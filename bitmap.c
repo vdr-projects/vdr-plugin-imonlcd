@@ -96,3 +96,4 @@ bool ciMonBitmap::SetPixel(int x, int y)
     bitmap[n] |= c;
     return true;
 }
+

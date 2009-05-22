@@ -101,3 +101,4 @@ Possible options are:
      vdr -P'imonlcd'
      vdr -P'imonlcd -d /dev/lcd0 -p ffdc'
 
+

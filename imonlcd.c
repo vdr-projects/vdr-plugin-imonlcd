@@ -222,3 +222,4 @@ cString cPluginImonlcd::SVDRPCommand(const char *Command, const char *Option, in
 }
 
 VDRPLUGINCREATOR(cPluginImonlcd); // Don't touch this!
+

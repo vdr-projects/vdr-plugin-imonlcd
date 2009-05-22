@@ -126,3 +126,4 @@ void ciMonStatusMonitor::OsdProgramme(time_t PresentTime, const char *PresentTit
   dsyslog("%5s %s", "", FollowingSubtitle);
 #endif
 }
+

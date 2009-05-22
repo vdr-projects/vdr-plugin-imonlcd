@@ -638,3 +638,4 @@ bool ciMonLCD::SetFont(const char *szFont) {
   }
   return false;
 }
+

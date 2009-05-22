@@ -36,3 +36,4 @@ class ciMonStatusMonitor : public cStatus {
 };
 
 #endif
+
