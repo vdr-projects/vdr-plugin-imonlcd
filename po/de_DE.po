@@ -1,0 +1,52 @@
+# vdr-imonlcd-plugin language source file.
+# Copyright (C) Andreas Brachold <vdr07 AT deltab de>
+# This file is distributed under the same license as the PACKAGE package.
+# Andreas Brachold <vdr07 AT deltab de> 2009
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: vdr-imonlcd-plugin 0.0.1\n"
+"Report-Msgid-Bugs-To: <see README>\n"
+"POT-Creation-Date: 2009-05-21 17:44+0200\n"
+"PO-Revision-Date: 2009-05-21 17:13+0200\n"
+"Last-Translator: Andreas Brachold <vdr07 AT deltab de>\n"
+"Language-Team: Andreas Brachold <vdr07 AT deltab de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Control a iMON LCD"
+msgstr "Steuert ein iMON LCD"
+
+msgid "iMON LCD"
+msgstr "iMON LCD"
+
+msgid "Contrast"
+msgstr "Kontrast"
+
+msgid "Default font"
+msgstr "Zeichensatz"
+
+msgid "Disc spinning mode"
+msgstr "Disc Rotationsmode"
+
+msgid "Slim disc"
+msgstr "Schlanke Scheibe"
+
+msgid "Full disc"
+msgstr "Volle Scheibe"
+
+msgid "Do nothing"
+msgstr "Nicht unternehmen"
+
+msgid "Showing clock"
+msgstr "Uhrzeit anzeigen"
+
+msgid "Turning backlight off"
+msgstr "Hintergrund abschalten"
+
+msgid "Exit mode"
+msgstr "Ende Modus"
+
+msgid "Unknown title"
+msgstr "Unbekannter Titel"

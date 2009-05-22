@@ -1,0 +1,103 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by : Andreas Brachold <vdr07 AT deltab de>
+
+Project's homepage: http://projects.vdr-developer.org/wiki/plg-imonlcd
+
+
+See the file COPYING for license information.
+
+
+Description:
+------------
+imonlcd is a plugin for the Video Disc Recorder and shows information
+about the current state of VDR on iMON LCD.
+
+
+Install LIRC kernel module lirc_imon:
+-------------------------------------
+You need installed kernel module lirc_imon installed to use the iMon LCD.
+This module are provided by LIRC (which will also allow you to use the IR 
+receiver that is built into the screen).
+
+Other software like LCDproc should not be used, it could locking the 
+device access. 
+
+Install LIRC
+A newer or current CVS version of LIRC is required for support of the iMON LCD.
+You need to have the CVS client installed and then you can issue the following 
+commands:
+
+#> cvs -d:pserver:anonymous@lirc.cvs.sourceforge.net:/cvsroot/lirc login
+#> cvs -z8 -d:pserver:anonymous@lirc.cvs.sourceforge.net:/cvsroot/lirc co lirc
+#> cd lirc
+#> ./autogen.sh
+#> ./setup.sh
+
+If you have any errors at this point, make sure you've installed all the 
+prerequisite build tools. At this you'll be at the "setup" menu for LIRC. 
+You'll need to choose "Driver Configuration" then 
+  
+  "USB Devices" then "Soundgraph iMON IR/LCD". 
+
+Choose OK, then "Save configuration & run configure" to run the configure script. 
+Once that finishes, run the following commands to install the modules:
+
+#> make
+#> make install
+#> modprobe lirc_imon
+
+At this point, you've got LIRC installed, and you might like to take some time
+to set up your remote (if you've got one). 
+That step is outside the scope of these instructions, so I'll just skip that 
+and move on to install vdr-plugin-imonlcd now.
+
+
+Install vdr-plugin-imonlcd:
+---------------------------
+Unpack the vdr-plugin-imonlcd tarball to $VDRSOURCE/PLUGINS/src directory
+
+#> cd /usr/local/src/vdr/PLUGINS/src
+#> tar -xzvf vdr-imonlcd-0.0.1.tgz
+#> ln -s imonlcd-0.0.1 imon
+
+Compile the plugin (from VDR's source directory)
+
+#> cd /usr/local/src/vdr/PLUGINS/src
+#> make plugins
+#> make install
+
+Check follow requirements 
+-------------------------
+* module lirc_imon is loaded
+* /dev/lcd0 still exits
+* /dev/lcd0 are writable
+
+* To determine need protocol to communicate with LCD, known values
+  0038 - For LCD with ID 15c2:0038 SoundGraph Inc (default)
+  ffdc - For LCD with ID 15c2:ffdc SoundGraph Inc
+
+  #> lsusb | grep 15c2
+  Bus 002 Device 002: ID 15c2:0038 SoundGraph Inc. 
+
+  or by udev      
+  #> udevinfo -a -n /dev/lcd0 \
+  | grep -2 'ATTRS{idVendor}=="15c2"' \
+  | grep ATTRS{idProduct} | cut -d '=' -f 3
+  "0038"
+
+
+Start VDR with the plugin.
+---------------------------
+You have to specify the device and protocol of your display in the config file
+on the command line.
+Possible options are:
+     -d DEV,   --device=DEV      sets the lcd-device to other device than /dev/lcd0
+     -p MODE,  --protocol=MODE   sets the protocol of lcd-device
+                          0038 - For LCD with ID 15c2:0038 SoundGraph Inc (default)
+                          ffdc - For LCD with ID 15c2:ffdc SoundGraph Inc
+
+   Examples:
+     vdr -P'imonlcd'
+     vdr -P'imonlcd -d /dev/lcd0 -p ffdc'
+
