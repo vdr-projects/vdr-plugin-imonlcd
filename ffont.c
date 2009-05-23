@@ -142,6 +142,12 @@ ciMonGlyph* ciMonFont::Glyph(uint CharCode) const
   if (error)
      esyslog("iMonLCD: FreeType: error during FT_Load_Glyph");
   else {
+#if ((FREETYPE_MAJOR == 2 && FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 7) \
+  || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR == 2 && FREETYPE_PATCH <= 1))
+     if (CharCode == 32) // workaround for libfreetype bug
+        error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+     else
+#endif
      error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
      if (error)
         esyslog("iMonLCD: FreeType: error during FT_Render_Glyph %d, %d\n", CharCode, glyph_index);
