@@ -47,7 +47,7 @@ ciMonWatch::ciMonWatch()
   m_nLastVolume = cDevice::CurrentVolume();
   m_bVolumeMute = false;
   
-  m_bShowOsdMessage = false;
+  osdItem = NULL;
   osdMessage = NULL;
 
   m_pControl = NULL;
@@ -80,6 +80,10 @@ ciMonWatch::~ciMonWatch()
   if(osdMessage) { 
       delete osdMessage;
       osdMessage = NULL;
+  }
+  if(osdItem) { 
+      delete osdItem;
+      osdItem = NULL;
   }
   if(replayTitle) {
     delete replayTitle;
@@ -292,11 +296,13 @@ void ciMonWatch::Action(void)
 bool ciMonWatch::RenderScreen() {
     cString* scRender;
     bool bForce = m_bUpdateScreen;
-    if(m_eWatchMode == eLiveTV) {
+    if(osdMessage) {
+      scRender = osdMessage;
+    } else if(osdItem) {
+      scRender = osdItem;
+    } else if(m_eWatchMode == eLiveTV) {
         if(Program()) {
           bForce = true;
-          m_nScrollOffset = 0;
-          m_bScrollBackward = false;
         }
         if(chPresentTitle)
           scRender = chPresentTitle;
@@ -305,10 +311,12 @@ bool ciMonWatch::RenderScreen() {
     } else {
         if(Replay()) {
           bForce = true;
-          m_nScrollOffset = 0;
-          m_bScrollBackward = false;
         }
         scRender = replayTitle;
+    }
+    if(bForce) {
+      m_nScrollOffset = 0;
+      m_bScrollBackward = false;
     }
     if(bForce || m_nScrollOffset > 0 || m_bScrollBackward) {
       this->clear();
@@ -654,22 +662,80 @@ bool ciMonWatch::Volume(int nVolume, bool bAbsolute)
   return bStateIsChanged;
 }
 
-void ciMonWatch::StatusMessage(const char *szMessage)
-{
+
+void ciMonWatch::OsdClear() {
     cMutexLooker m(mutex);
-    if(szMessage) {
-        if(osdMessage) { 
-            delete osdMessage;
-            osdMessage = NULL;
-        }
-        if (!isempty(szMessage)) {
-            osdMessage = new cString(szMessage);
-            m_bShowOsdMessage = true;
-            m_bUpdateScreen = true;
-        }
-    } else {
-        m_bShowOsdMessage = false;
+    if(osdMessage) { 
+        delete osdMessage;
+        osdMessage = NULL;
         m_bUpdateScreen = true;
+    }
+    if(osdItem) { 
+        delete osdItem;
+        osdItem = NULL;
+        m_bUpdateScreen = true;
+    }
+}
+
+void ciMonWatch::OsdCurrentItem(const char *sz)
+{
+    char *s = NULL;
+    char *sc = NULL;
+    if(sz && !isempty(sz)) {
+        s = strdup(sz);
+        sc = compactspace(strreplace(s,'\t',' '));
+    }
+    if(sc 
+        && osdItem 
+        && 0 == strcmp(sc, *osdItem)) {
+      if(s) {
+        free(s);
+      }
+      return;
+    }
+    cMutexLooker m(mutex);
+    if(osdItem) { 
+        delete osdItem;
+        osdItem = NULL;
+        m_bUpdateScreen = true;
+    }
+    if(sc) {
+          osdItem = new cString(sc);
+          m_bUpdateScreen = true;
+    }
+    if(s) {
+      free(s);
+    }
+}
+
+void ciMonWatch::OsdStatusMessage(const char *sz)
+{
+    char *s = NULL;
+    char *sc = NULL;
+    if(sz && !isempty(sz)) {
+        s = strdup(sz);
+        sc = compactspace(strreplace(s,'\t',' '));
+    }
+    if(sc 
+        && osdMessage 
+        && 0 == strcmp(sc, *osdMessage)) {
+      if(s) {
+        free(s);
+      }
+      return;
+    }
+    cMutexLooker m(mutex);
+    if(osdMessage) { 
+        delete osdMessage;
+        osdMessage = NULL;
+        m_bUpdateScreen = true;
+    }
+    if(sc) {
+          osdMessage = new cString(sc);
+          m_bUpdateScreen = true;
+    }
+    if(s) {
+      free(s);
     }
 }
 

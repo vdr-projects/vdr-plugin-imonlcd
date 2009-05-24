@@ -95,7 +95,7 @@ private:
   int   m_nLastVolume;
   bool  m_bVolumeMute;
 
-  bool  m_bShowOsdMessage;
+  cString*    osdItem;
   cString*    osdMessage;
 
   eReplayMode m_eReplayMode;
@@ -120,7 +120,10 @@ public:
   void Recording(const cDevice *pDevice, const char *szName, const char *szFileName, bool bOn);
   void Channel(int nChannelNumber);
   bool Volume(int nVolume, bool bAbsolute);
-  void StatusMessage(const char *szMessage);
+
+  void OsdClear();
+  void OsdCurrentItem(const char *sz);
+  void OsdStatusMessage(const char *sz);
 
   virtual bool SetFont(const char *szFont);
 };

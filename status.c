@@ -64,14 +64,15 @@ void ciMonStatusMonitor::Replaying(const cControl *pControl, const char *szName,
 
 void ciMonStatusMonitor::OsdClear(void)
 {
-#ifdef unusedMOREDEBUGMSG
+#ifdef MOREDEBUGMSG
   dsyslog("iMonLCD: OsdClear");
 #endif
+  m_pDev->OsdClear();
 }
 
 void ciMonStatusMonitor::OsdTitle(const char *Title)
 {
-#ifdef unusedMOREDEBUGMSG
+#ifdef MOREDEBUGMSG
   dsyslog("iMonLCD: OsdTitle '%s'", Title);
 #endif
 }
@@ -81,7 +82,7 @@ void ciMonStatusMonitor::OsdStatusMessage(const char *szMessage)
 #ifdef MOREDEBUGMSG
   dsyslog("iMonLCD: OsdStatusMessage '%s'", szMessage ? szMessage : "NULL");
 #endif
-  m_pDev->StatusMessage(szMessage);
+  m_pDev->OsdStatusMessage(szMessage);
 }
 
 void ciMonStatusMonitor::OsdHelpKeys(const char *Red, const char *Green, const char *Yellow, const char *Blue)
@@ -91,23 +92,24 @@ void ciMonStatusMonitor::OsdHelpKeys(const char *Red, const char *Green, const c
 #endif
 }
 
-void ciMonStatusMonitor::OsdCurrentItem(const char *Text)
+void ciMonStatusMonitor::OsdCurrentItem(const char *szText)
 {
-#ifdef unusedMOREDEBUGMSG
-  dsyslog("iMonLCD: OsdCurrentItem %s", Text);
+#ifdef MOREDEBUGMSG
+  dsyslog("iMonLCD: OsdCurrentItem %s", szText);
 #endif
+  m_pDev->OsdCurrentItem(szText);
 }
 
 void ciMonStatusMonitor::OsdTextItem(const char *Text, bool Scroll)
 {
-#ifdef unusedMOREDEBUGMSG
+#ifdef MOREDEBUGMSG
   dsyslog("iMonLCD: OsdTextItem %s %d", Text, Scroll);
 #endif
 }
 
 void ciMonStatusMonitor::OsdChannel(const char *Text)
 {
-#ifdef unusedMOREDEBUGMSG
+#ifdef MOREDEBUGMSG
   dsyslog("iMonLCD: OsdChannel %s", Text);
 #endif
 }
