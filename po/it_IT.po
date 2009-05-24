@@ -1,0 +1,56 @@
+# vdr-imonlcd-plugin language source file.
+# Copyright (C) Diego Pierotto <vdr-italian at tiscali.it>
+# This file is distributed under the same license as the PACKAGE package.
+# Diego Pierotto <vdr-italian at tiscali.it> 2009
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: vdr-imonlcd-plugin 0.0.1\n"
+"Report-Msgid-Bugs-To: <see README>\n"
+"POT-Creation-Date: 2009-05-21 17:44+0200\n"
+"PO-Revision-Date: 2009-05-23 16:20+0100\n"
+"Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Italian\n"
+"X-Poedit-Country: ITALY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+msgid "Control a iMON LCD"
+msgstr "Controlla un LCD iMON"
+
+msgid "iMON LCD"
+msgstr "LCD iMON"
+
+msgid "Contrast"
+msgstr "Contrasto"
+
+msgid "Default font"
+msgstr "Carattere predefinito"
+
+msgid "Disc spinning mode"
+msgstr "Modalità rotazione disco"
+
+msgid "Slim disc"
+msgstr "Disco leggero"
+
+msgid "Full disc"
+msgstr "Disco pieno"
+
+msgid "Do nothing"
+msgstr "Non fare nulla"
+
+msgid "Showing clock"
+msgstr "Mostra orologio"
+
+msgid "Turning backlight off"
+msgstr "Spegni retroilluminazione"
+
+msgid "Exit mode"
+msgstr "Modalità d'uscita"
+
+msgid "Unknown title"
+msgstr "Titolo sconosciuto"
+
