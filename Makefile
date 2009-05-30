@@ -3,8 +3,14 @@
 #
 # (C) 2009 Andreas Brachold <vdr07 AT deltab de>
 #
-# $Id$
-
+# This iMON LCD plugin is free software: you can redistribute it and/or 
+# modify it under the terms of the GNU General Public License as published 
+# by the Free Software Foundation, version 3 of the License.
+#
+# See the files README and COPYING for details.
+#
+################################################################################
+#
 # The official name of this plugin.
 # This name will be used in the '-P...' option of VDR to load the plugin.
 # By default the main source file also carries this name.
