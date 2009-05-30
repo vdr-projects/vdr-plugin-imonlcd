@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-imonlcd-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2009-05-21 17:44+0200\n"
+"POT-Creation-Date: 2009-05-30 13:41+0200\n"
 "PO-Revision-Date: 2009-05-21 17:13+0200\n"
 "Last-Translator: Andreas Brachold <vdr07 AT deltab de>\n"
 "Language-Team: Andreas Brachold <vdr07 AT deltab de>\n"
@@ -43,11 +43,16 @@ msgid "Showing clock"
 msgstr "Uhrzeit anzeigen"
 
 msgid "Turning backlight off"
-msgstr "Hintergrund abschalten"
+msgstr "Abschalten der Anzeige"
+
+msgid "Showing next timer"
+msgstr "Nächsten Timer anzeigen"
 
 msgid "Exit mode"
 msgstr "Ende Modus"
 
+msgid "None active timer"
+msgstr "Kein aktiver Timer"
+
 msgid "Unknown title"
 msgstr "Unbekannter Titel"
-

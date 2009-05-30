@@ -205,56 +205,47 @@ int ciMonLCD::open(const char* szDevice, eProtocol pro)
 	return 0;
 }
 
+/*
+ * turning backlight off (confirmed for a Silverstone LCD) (as "cybrmage" at
+ * mediaportal pointed out, his LCD is an Antec built-in one and turns completely
+ * off with this command)
+ */
+bool ciMonLCD::SendCmdShutdown() {
+	return SendCmd(this->cmd_shutdown)
+         &&	SendCmd(this->cmd_clear_alarm);
+}
+
+/*
+ * Show the big clock. We need to set it to the current time, then it just
+ * keeps counting automatically.
+ */
+bool ciMonLCD::SendCmdClock() {
+  time_t tt;
+  struct tm l;
+  uint64_t data;
+
+	tt = time(NULL);
+  localtime_r(&tt, &l);
+
+	data = this->cmd_display;
+	data += ((uint64_t) l.tm_sec << 48);
+	data += ((uint64_t) l.tm_min << 40);
+	data += ((uint64_t) l.tm_hour << 32);
+	data += ((uint64_t) l.tm_mday << 24);
+	data += ((uint64_t) l.tm_mon << 16);
+	data += (((uint64_t) l.tm_year) << 8);
+	data += 0x80;
+
+	return SendCmd(data)
+         &&	SendCmd(this->cmd_clear_alarm);
+}
+
 /**
  * Close the driver (do necessary clean-up).
  */
 void ciMonLCD::close()
 {
-	time_t tt;
-	struct tm *t;
-	uint64_t data;
-
 	if (this->imon_fd >= 0) {
-		if (theSetup.m_nOnExit == eOnExitMode_SHOWMSG) {
-			/*
-			 * "show message" means "do nothing" - the
-			 * message is there already
-			 */
-			isyslog("iMonLCD: closing, leaving \"last\" message.");
-		} else if (theSetup.m_nOnExit == eOnExitMode_BLANKSCREEN) {
-			/*
-			 * turning backlight off (confirmed for my
-			 * Silverstone LCD) (as "cybrmage" at
-			 * mediaportal pointed out, his LCD is an
-			 * Antec built-in one and turns completely
-			 * off with this command)
-			 */
-			isyslog("iMonLCD: closing, turning backlight off.");
-			SendCmd(this->cmd_shutdown);
-			SendCmd(this->cmd_clear_alarm);
-		} else {
-			/*
-			 * by default, show the big clock. We need to
-			 * set it to the current time, then it just
-			 * keeps counting automatically.
-			 */
-			isyslog("iMonLCD: closing, showing clock.");
-
-			tt = time(NULL);
-			t = localtime(&tt);
-
-			data = this->cmd_display;
-			data += ((uint64_t) t->tm_sec << 48);
-			data += ((uint64_t) t->tm_min << 40);
-			data += ((uint64_t) t->tm_hour << 32);
-			data += ((uint64_t) t->tm_mday << 24);
-			data += ((uint64_t) t->tm_mon << 16);
-			data += (((uint64_t) t->tm_year) << 8);
-			data += 0x80;
-			SendCmd(data);
-			SendCmd(this->cmd_clear_alarm);
-		}
-
 		::close(this->imon_fd);
     this->imon_fd = -1;
 	}

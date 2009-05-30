@@ -17,6 +17,15 @@
 #include <vdr/menuitems.h>
 #define memberof(x) (sizeof(x)/sizeof(*x))
 
+enum eOnExitMode {
+   eOnExitMode_FIRSTITEM   = 0
+  ,eOnExitMode_SHOWMSG     = 0 /**< Do nothing - just leave the "last" message there */
+  ,eOnExitMode_SHOWCLOCK   = 1 /**< Show the big clock */
+  ,eOnExitMode_BLANKSCREEN = 2 /**< Blank the device completely */
+  ,eOnExitMode_NEXTTIMER   = 3 /**< Show next active timer */
+  ,eOnExitMode_LASTITEM    = 3
+};
+
 struct cIMonSetup 
 {
   int          m_nOnExit;

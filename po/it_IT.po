@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-imonlcd-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2009-05-21 17:44+0200\n"
+"POT-Creation-Date: 2009-05-30 13:41+0200\n"
 "PO-Revision-Date: 2009-05-23 16:20+0100\n"
 "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
 "Language-Team: \n"
@@ -48,9 +48,14 @@ msgstr "Mostra orologio"
 msgid "Turning backlight off"
 msgstr "Spegni retroilluminazione"
 
+msgid "Showing next timer"
+msgstr ""
+
 msgid "Exit mode"
 msgstr "Modalità d'uscita"
 
+msgid "None active timer"
+msgstr ""
+
 msgid "Unknown title"
 msgstr "Titolo sconosciuto"
-

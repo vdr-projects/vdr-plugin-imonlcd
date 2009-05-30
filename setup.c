@@ -94,9 +94,9 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
   // OnExit
   if(!strcasecmp(szName, "OnExit")) {
     int n = atoi(szValue);
-    if ((n < 0) || (n > 3)) {
-		    esyslog("iMonLCD: OnExit must be between 0 and 3; using default %d",
-		           DEFAULT_ON_EXIT);
+    if ((n < eOnExitMode_FIRSTITEM) || (n > eOnExitMode_LASTITEM)) {
+		    esyslog("iMonLCD: OnExit must be between %d and %d; using default %d",
+		           eOnExitMode_FIRSTITEM, eOnExitMode_LASTITEM, DEFAULT_ON_EXIT);
 		    n = DEFAULT_ON_EXIT;
     }
     m_nOnExit = n;
@@ -177,10 +177,11 @@ ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
         tr("Slim disc"), tr("Full disc")));
 
 
-  static const char * szExitModes[3];
+  static const char * szExitModes[eOnExitMode_LASTITEM + 1];
   szExitModes[eOnExitMode_SHOWMSG]      = tr("Do nothing");
   szExitModes[eOnExitMode_SHOWCLOCK]    = tr("Showing clock");
   szExitModes[eOnExitMode_BLANKSCREEN]  = tr("Turning backlight off");
+  szExitModes[eOnExitMode_NEXTTIMER]    = tr("Showing next timer");
 
   Add(new cMenuEditStraItem (tr("Exit mode"),           
         &m_tmpSetup.m_nOnExit,

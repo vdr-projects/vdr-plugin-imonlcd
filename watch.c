@@ -113,6 +113,46 @@ void ciMonWatch::close() {
     usleep(500000);
     Cancel();
   }
+    
+  switch(theSetup.m_nOnExit) {
+    case eOnExitMode_NEXTTIMER: {
+			isyslog("iMonLCD: closing, show next timer.");
+      cTimer* t = Timers.GetNextActiveTimer();
+      this->setLineLength(0,0,0,0);
+
+      this->clear();
+      if(t) {
+        struct tm l;
+        time_t tt = t->StartTime();
+        localtime_r(&tt, &l);
+        cString topic = cString::sprintf("%d. %02d:%02d %s", l.tm_mday, l.tm_hour, l.tm_min, t->File());
+        this->DrawText(0,0,topic);
+        this->icons(eIconALARM);
+      } else {
+        this->DrawText(0,0,tr("None active timer"));
+        this->icons(0);
+      }
+      this->flush();
+      break;
+		}
+    case eOnExitMode_SHOWMSG: {
+			isyslog("iMonLCD: closing, leaving \"last\" message.");
+      break;
+		} 
+    case eOnExitMode_BLANKSCREEN: {
+			isyslog("iMonLCD: closing, turning backlight off.");
+      SendCmdShutdown();
+      break;
+		} 
+    default:
+    case eOnExitMode_SHOWCLOCK: {
+			isyslog("iMonLCD: closing, showing clock.");
+      SendCmdClock();
+      break;
+		} 
+	}
+
+
   ciMonLCD::close();
 }
 

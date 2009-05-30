@@ -21,12 +21,6 @@ enum eProtocol {
   ePROTOCOL_0038   =   1	/**< protocol ID for 15c2:0038 device */
 };
 
-enum eOnExitMode {
-  eOnExitMode_SHOWMSG     = 0, /**< Do nothing - just leave the "last" message there */
-  eOnExitMode_SHOWCLOCK   = 1, /**< Show the big clock */
-  eOnExitMode_BLANKSCREEN = 2	 /**< Blank the device completely */
-};
-
 enum eIcons {
   eIconOff = 0,
   eIconDiscSpin  = 1 << 0,
@@ -118,6 +112,8 @@ protected:
   int lengthToPixels(int length);
 
   bool SendCmd(const uint64_t & cmdData);
+  bool SendCmdClock();
+  bool SendCmdShutdown();
   bool Contrast(int nContrast);
 public:
   ciMonLCD();
