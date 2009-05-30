@@ -30,7 +30,10 @@ private:
   char*              m_szDevice;
   ciMonWatch         m_dev;
   eProtocol          m_Protocol;
-
+  bool               m_bSuspend;
+protected:
+  bool resume();
+  bool suspend();
 public:
   cPluginImonlcd(void);
   virtual ~cPluginImonlcd();
@@ -57,6 +60,7 @@ public:
 cPluginImonlcd::cPluginImonlcd(void)
 : m_Protocol(ePROTOCOL_0038)
 {
+  m_bSuspend = true;
   statusMonitor = NULL;
   m_szDevice = NULL;
 }
@@ -140,10 +144,29 @@ bool cPluginImonlcd::Initialize(void)
   return true;
 }
 
+bool cPluginImonlcd::resume() {
+
+  if(m_bSuspend
+      && NULL != m_szDevice 
+      && 0 == m_dev.open(m_szDevice,m_Protocol)) {
+        m_bSuspend = false;
+      return true;
+  }
+  return false;
+}
+
+bool cPluginImonlcd::suspend() {
+  if(!m_bSuspend) {
+    m_dev.close();
+    m_bSuspend = true;
+    return true;
+  }
+  return false;
+}
+
 bool cPluginImonlcd::Start(void)
 {
-  if(NULL != m_szDevice 
-      && 0 == m_dev.open(m_szDevice,m_Protocol)) {
+  if(resume()) {
       statusMonitor = new ciMonStatusMonitor(&m_dev);
       if(NULL == statusMonitor){
         esyslog("iMonLCD: can't create ciMonStatusMonitor!");
@@ -215,14 +238,45 @@ bool cPluginImonlcd::Service(const char *Id, void *Data)
 const char **cPluginImonlcd::SVDRPHelpPages(void)
 {
   // Return help text for SVDRP commands this plugin implements
-  return NULL;
+  static const char *HelpPages[] = {
+    "ON\n"
+    "    Resume driver of display.",
+    "OFF\n"
+    "    Suspend driver of display.",
+    NULL
+    };
+  return HelpPages;
 }
 
 cString cPluginImonlcd::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
 {
   // Process SVDRP commands this plugin implements
+  if(!strcasecmp(Command, "ON")) {
+    if(!m_bSuspend) {
+      ReplyCode=251; 
+      return "driver already resumed";
+    }
+    if(resume()) {
+      ReplyCode=250; 
+      return "driver resumed";
+    } else {
+      ReplyCode=554; 
+      return "driver could not resumed";
+    }
+  } else if(!strcasecmp(Command, "OFF")) {
+    if(suspend()) {
+      ReplyCode=250; 
+      return "driver suspended";
+    } else {
+      ReplyCode=251; 
+      return "driver already suspended";
+    }
+  } else { 
+    ReplyCode=501; 
+    return "unknown command"; 
+  }
+
   return NULL;
 }
 
 VDRPLUGINCREATOR(cPluginImonlcd); // Don't touch this!
-

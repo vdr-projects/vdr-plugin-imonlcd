@@ -122,20 +122,6 @@ ciMonLCD::ciMonLCD()
 
 ciMonLCD::~ciMonLCD() {
   this->close();
-
-  if(pFont) {
-    delete pFont;
-    pFont = NULL;
-  }
-  if(framebuf) {
-    delete framebuf;
-    framebuf = NULL;
-  }
-  if(backingstore) {
-    delete backingstore;
-    backingstore = NULL;
-  }
-
 }
 
 
@@ -249,6 +235,20 @@ void ciMonLCD::close()
 		::close(this->imon_fd);
     this->imon_fd = -1;
 	}
+
+  if(pFont) {
+    delete pFont;
+    pFont = NULL;
+  }
+  if(framebuf) {
+    delete framebuf;
+    framebuf = NULL;
+  }
+  if(backingstore) {
+    delete backingstore;
+    backingstore = NULL;
+  }
+
 }
 
 
@@ -271,6 +271,11 @@ bool ciMonLCD::flush()
 
 	unsigned char msb;
 	int offset = 0;
+
+  if(this->imon_fd<0) {
+		esyslog("iMonLCD: error writing to dead file descriptor");
+    return false;
+  }
 
 	/*
 	 * The display only provides for a complete screen refresh. If
@@ -484,7 +489,11 @@ bool ciMonLCD::icons(int state)
 bool ciMonLCD::SendCmd(const uint64_t & cmdData) {
 	unsigned int i;
 	unsigned char buf[8];
-
+  
+  if(this->imon_fd<0) {
+		esyslog("iMonLCD: error writing to dead file descriptor");
+    return false;
+  }
   //dsyslog("iMonLCD: writing : %08llx", cmdData);
 
 	/* Fill the send buffer. */

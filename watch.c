@@ -101,6 +101,8 @@ ciMonWatch::~ciMonWatch()
 int ciMonWatch::open(const char* szDevice, eProtocol pro) {
     int iRet = ciMonLCD::open(szDevice,pro);
     if(0==iRet) {
+        m_bShutdown = false;
+        m_bUpdateScreen = true;
         Start();
     }
     return iRet;
