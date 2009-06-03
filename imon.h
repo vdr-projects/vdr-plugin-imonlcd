@@ -69,8 +69,8 @@ enum eIcons {
   eIconBL_Mask    = (eIconBL_MPG|eIconBL_DIVX|eIconBL_XVID|eIconBL_WMV),
 
   eIconVolume    = 1 << 22,
-  eIconTIME      = 1 << 23,
-  eIconALARM     = 1 << 24,
+  eIconTime      = 1 << 23,
+  eIconAlarm     = 1 << 24,
 
   eIconRecording = 1 << 25,
 
@@ -127,7 +127,7 @@ public:
   int DrawText(int x, int y, const char* string);
   bool flush ();
 
-  bool icons(int state);
+  bool icons(unsigned int state);
   virtual bool SetFont(const char *szFont);
 };
 #endif

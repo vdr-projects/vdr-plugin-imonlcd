@@ -31,9 +31,15 @@ private:
   ciMonWatch         m_dev;
   eProtocol          m_Protocol;
   bool               m_bSuspend;
+  char*              m_szIconHelpPage;
 protected:
   bool resume();
   bool suspend();
+
+  const char* SVDRPCommandOn(const char *Option, int &ReplyCode);
+  const char* SVDRPCommandOff(const char *Option, int &ReplyCode);
+  const char* SVDRPCommandIcon(const char *Option, int &ReplyCode);
+
 public:
   cPluginImonlcd(void);
   virtual ~cPluginImonlcd();
@@ -63,6 +69,7 @@ cPluginImonlcd::cPluginImonlcd(void)
   m_bSuspend = true;
   statusMonitor = NULL;
   m_szDevice = NULL;
+  m_szIconHelpPage = NULL;
 }
 
 cPluginImonlcd::~cPluginImonlcd()
@@ -77,6 +84,11 @@ cPluginImonlcd::~cPluginImonlcd()
     free(m_szDevice);
     m_szDevice = NULL;
   }  
+
+  if(m_szIconHelpPage) {
+    free(m_szIconHelpPage);
+    m_szIconHelpPage = NULL;
+  }
 }
 
 const char *cPluginImonlcd::CommandLineHelp(void)
@@ -235,23 +247,8 @@ bool cPluginImonlcd::Service(const char *Id, void *Data)
   return false;
 }
 
-const char **cPluginImonlcd::SVDRPHelpPages(void)
+const char* cPluginImonlcd::SVDRPCommandOn(const char *Option, int &ReplyCode)
 {
-  // Return help text for SVDRP commands this plugin implements
-  static const char *HelpPages[] = {
-    "ON\n"
-    "    Resume driver of display.",
-    "OFF\n"
-    "    Suspend driver of display.",
-    NULL
-    };
-  return HelpPages;
-}
-
-cString cPluginImonlcd::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
-{
-  // Process SVDRP commands this plugin implements
-  if(!strcasecmp(Command, "ON")) {
     if(!m_bSuspend) {
       ReplyCode=251; 
       return "driver already resumed";
@@ -263,7 +260,10 @@ cString cPluginImonlcd::SVDRPCommand(const char *Command, const char *Option, in
       ReplyCode=554; 
       return "driver could not resumed";
     }
-  } else if(!strcasecmp(Command, "OFF")) {
+}
+
+const char* cPluginImonlcd::SVDRPCommandOff(const char *Option, int &ReplyCode)
+{
     if(suspend()) {
       ReplyCode=250; 
       return "driver suspended";
@@ -271,12 +271,174 @@ cString cPluginImonlcd::SVDRPCommand(const char *Command, const char *Option, in
       ReplyCode=251; 
       return "driver already suspended";
     }
-  } else { 
-    ReplyCode=501; 
-    return "unknown command"; 
-  }
-
-  return NULL;
 }
 
+static const struct  {
+    unsigned int nIcon;
+    const char* szIcon;    
+} icontable[] = {
+    { eIconTopMusic  , "Music" },
+    { eIconTopMovie  , "Movie" },
+    { eIconTopPhoto  , "Photo" },
+    { eIconTopDVD    , "DVD" },
+    { eIconTopTV     , "TopTV" },
+    { eIconTopWeb    , "Web" },
+    { eIconTopNews   , "News" },
+    { eIconSpeakerL  , "SpeakerL" },
+    { eIconSpeakerR  , "SpeakerR" },
+    { eIconSpeakerLR , "SpeakerLR" },
+    { eIconSpeaker51 , "Speaker51" },
+    { eIconSpeaker71 , "Speaker71" },
+    { eIconSPDIF     , "SPDIF" },
+    { eIconMute      , "MUTE" },
+    { eIconDiscSpin|eIconDiscRunSpin|eIconDiscEllispe  , "DISC" },
+    { eIconTV        , "TV" },
+    { eIconHDTV      , "HDTV" },
+    { eIconSRC       , "SRC" },
+    { eIconSRC1      , "SRC1" },
+    { eIconSRC2      , "SRC2" },
+    { eIconFIT       , "FIT" },
+    { eIconBL_MPG    , "MPG" },
+    { eIconBL_DIVX   , "DIVX" },
+    { eIconBL_XVID   , "XVID" },
+    { eIconBL_WMV    , "WMV" },
+    { eIconBM_MPG    , "MPGA" },
+    { eIconBM_AC3    , "AC3" },
+    { eIconBM_DTS    , "DTS" },
+    { eIconBM_WMA    , "WMAA" },
+    { eIconBR_MP3    , "MP3" },
+    { eIconBR_OGG    , "OGG" },
+    { eIconBR_WMA    , "WMA" },
+    { eIconBR_WAV    , "WAV" },
+    { eIconVolume    , "VOL" },
+    { eIconTime      , "TIME" },
+    { eIconAlarm     , "ALARM" },
+    { eIconRecording , "REC" },
+    { eIconRepeat    , "REP" },
+    { eIconShuffle   , "SFL" }
+};
+
+const char* cPluginImonlcd::SVDRPCommandIcon(const char *Option, int &ReplyCode)
+{
+  if(m_bSuspend) {
+      ReplyCode=251; 
+      return "driver suspended";
+  }
+  if( Option && strlen(Option) < 256) {
+    char* request = strdup(Option);
+    char* cmd = NULL;
+    if( request ) {
+      char* tmp = request;
+      eIconState m = eIconStateQuery;
+      cmd = strtok_r(request, " ", &tmp);
+      if(cmd) {
+        char* param = strtok_r(0, " ", &tmp);
+        if(param) {
+          if(!strcasecmp(param,"ON")) {
+            m = eIconStateOn;
+          } else if(!strcasecmp(param,"OFF")) {
+            m = eIconStateOff;
+          } else if(!strcasecmp(param,"AUTO")) {
+            m = eIconStateAuto;
+          } else {
+            ReplyCode=501; 
+            free(request);
+            return "unknown icon state";
+          }
+        }
+      }
+
+      ReplyCode=501; 
+      const char* szReplay = "unknown icon title";
+      if(cmd) {
+        unsigned int i;
+        for(i = 0; i < (sizeof(icontable)/sizeof(*icontable));++i)
+        {
+            if(0 == strcasecmp(cmd,icontable[i].szIcon))    
+            {
+                eIconState r = m_dev.ForceIcon(icontable[i].nIcon, m);
+                switch(r) {
+                  case eIconStateAuto:
+                    ReplyCode=250; 
+                    szReplay = "icon state 'auto'";
+                    break;
+                  case eIconStateOn:
+                    ReplyCode=251; 
+                    szReplay = "icon state 'on'";
+                    break;
+                  case eIconStateOff:
+                    ReplyCode=252; 
+                    szReplay = "icon state 'off'";
+                    break;
+                  default:
+                    break;
+                }
+                break;
+            }
+        }
+      }
+      free(request);
+      return szReplay;
+    }
+  }
+  ReplyCode=501; 
+  return "wrong parameter";
+}
+
+cString cPluginImonlcd::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
+{
+  ReplyCode=501; 
+  const char* szReplay = "unknown command";
+
+  if(!strcasecmp(Command, "ON")) {
+    szReplay = SVDRPCommandOn(Option,ReplyCode);
+  } else if(!strcasecmp(Command, "OFF")) {
+    szReplay = SVDRPCommandOff(Option,ReplyCode);
+  } else if(!strcasecmp(Command, "ICON")) {
+    szReplay = SVDRPCommandIcon(Option,ReplyCode);
+  } 
+
+  dsyslog("iMonLCD: SVDRP %s %s - %d (%s)", Command, Option, ReplyCode, szReplay);
+  return szReplay;
+}
+
+const char **cPluginImonlcd::SVDRPHelpPages(void)
+{
+  if(!m_szIconHelpPage) {
+    unsigned int i,l,k;
+    for(i = 0,l = 0, k = (sizeof(icontable)/sizeof(*icontable)); i < k;++i) {
+      l += strlen(icontable[i].szIcon);
+      l += 2;
+    }
+    l += 80;
+
+    m_szIconHelpPage = (char*) calloc(l + 1,1);
+    if(m_szIconHelpPage) {
+      strncat(m_szIconHelpPage, "ICON [name] [on|off|auto]\n    Force state of icon. Names of icons are:", l);
+      for(i = 0; i < k;++i) {
+        if((i % 7) == 0) {
+          strncat(m_szIconHelpPage, "\n    ", l - (strlen(m_szIconHelpPage) + 5));
+        } else {
+          strncat(m_szIconHelpPage, ",", l - (strlen(m_szIconHelpPage) + 1));
+        }
+        strncat(m_szIconHelpPage, icontable[i].szIcon, 
+          l - (strlen(m_szIconHelpPage) + strlen(icontable[i].szIcon)));
+      }
+    }
+  }
+
+  // Return help text for SVDRP commands this plugin implements
+  static const char *HelpPages[] = {
+    "ON\n"
+    "    Resume driver of display.\n",
+    "OFF\n"
+    "    Suspend driver of display.\n",
+    "ICON [name] [on|off|auto]\n"
+    "    Force state of icon.\n",
+    NULL
+    };
+  if(m_szIconHelpPage)
+    HelpPages[2] = m_szIconHelpPage;
+  return HelpPages;
+}
 VDRPLUGINCREATOR(cPluginImonlcd); // Don't touch this!

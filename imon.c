@@ -349,7 +349,7 @@ int ciMonLCD::DrawText(int x, int y, const char* string)
  *
  * \param state    This symbols to display.
  */
-bool ciMonLCD::icons(int state)
+bool ciMonLCD::icons(unsigned int state)
 {
 	uint64_t icon = 0x0;
 
@@ -466,8 +466,8 @@ bool ciMonLCD::icons(int state)
 	}
 
 	icon |= ((state & eIconVolume) != 0)      ? ICON_VOL : 0;
-	icon |= ((state & eIconTIME) != 0)        ? ICON_TIME : 0;
-	icon |= ((state & eIconALARM) != 0)       ? ICON_ALARM : 0;
+	icon |= ((state & eIconTime) != 0)        ? ICON_TIME : 0;
+	icon |= ((state & eIconAlarm) != 0)       ? ICON_ALARM : 0;
 	icon |= ((state & eIconRecording) != 0)   ? ICON_REC : 0;
 	icon |= ((state & eIconRepeat) != 0)      ? ICON_REP : 0;
 	icon |= ((state & eIconShuffle) != 0)     ? ICON_SFL : 0;

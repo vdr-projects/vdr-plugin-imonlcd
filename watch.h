@@ -67,6 +67,14 @@ enum eAudioMode {
     eAudioWAV   = 1 << 6
 };
 
+enum eIconState { 
+  eIconStateQuery, 
+  eIconStateOn, 
+  eIconStateOff, 
+  eIconStateAuto 
+};
+
+
 class ciMonWatch
  : public  ciMonLCD
  , protected cThread {
@@ -84,6 +92,10 @@ private:
   bool  m_bUpdateScreen;
 
   int   m_nCardIsRecording[16];
+
+  unsigned int m_nIconsForceOn;
+  unsigned int m_nIconsForceOff;
+  unsigned int m_nIconsForceMask;
 
   const cControl *m_pControl;
 
@@ -129,6 +141,8 @@ public:
   void OsdStatusMessage(const char *sz);
 
   virtual bool SetFont(const char *szFont);
+
+  eIconState ForceIcon(unsigned int nIcon, eIconState nState);
 };
 
 #endif

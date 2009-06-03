@@ -114,25 +114,32 @@ Possible options are:
 
 Plugin SVDRP commands
 ---------------------
+* HELP - List known commands
 * OFF - Suspend driver of display.
 * ON  - Resume driver of display.
+* ICON [name] [on|off|auto] - Force state of icon. 
 
-Use this commands like 
+Use this commands like follow samples 
     #> svdrpsend.pl PLUG imonlcd OFF
     220 vdr SVDRP VideoDiskRecorder ....
     250 driver suspended
     221 vdr closing connection
 
-This commands can have follow responses 
-OFF :
-    250 driver suspended           
-    251 driver already suspended
+    #> svdrpsend.pl PLUG imonlcd HELP ICON
+    214-ICON [name] [on|off|auto]
+    214-    Force state of icon. Names of icons are:
+    214-    Music,Movie,Photo,DVD,TopTV,Web,News
+    ...
 
-ON :
-    250 driver resumed
-    251 driver already resumed
-    554 driver could not resumed
-*
-    501 unknown command
+This commands can have follow responses 
+OFF :   250 driver suspended           
+        251 driver already suspended
+ON :    250 driver resumed
+        251 driver already resumed
+        554 driver could not resumed
+ICON :  250 icon state 'auto'
+        251 icon state 'on'
+        252 icon state 'off'
+*       501 unknown command
 
 

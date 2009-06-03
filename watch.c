@@ -37,6 +37,10 @@ ciMonWatch::ciMonWatch()
 : cThread("iMonLCD: watch thread")
 , m_bShutdown(false)
 {
+  m_nIconsForceOn = 0;
+  m_nIconsForceOff = 0;
+  m_nIconsForceMask = 0;
+
   unsigned int n;
   for(n=0;n<memberof(m_nCardIsRecording);++n) {
       m_nCardIsRecording[n] = 0;  
@@ -129,7 +133,7 @@ void ciMonWatch::close() {
         localtime_r(&tt, &l);
         cString topic = cString::sprintf("%d. %02d:%02d %s", l.tm_mday, l.tm_hour, l.tm_min, t->File());
         this->DrawText(0,0,topic);
-        this->icons(eIconALARM);
+        this->icons(eIconAlarm);
       } else {
         this->DrawText(0,0,tr("None active timer"));
         this->icons(0);
@@ -160,7 +164,7 @@ void ciMonWatch::close() {
 
 void ciMonWatch::Action(void)
 {
-  int nLastIcons = -1;
+  unsigned int nLastIcons = -1;
   int nContrast = -1;
 
   unsigned int n;
@@ -178,7 +182,7 @@ void ciMonWatch::Action(void)
     
     LOCK_THREAD;
 
-    int nIcons = 0;
+    unsigned int nIcons = 0;
     bool bUpdateIcons = false;
     bool bFlush = false;
     if(m_bShutdown)
@@ -312,6 +316,15 @@ void ciMonWatch::Action(void)
     if(theSetup.m_nContrast != nContrast) {
       nContrast = theSetup.m_nContrast;
       Contrast(nContrast);
+    }
+
+    //Force icon state (defined by svdrp)
+    nIcons &= ~(m_nIconsForceMask);
+    nIcons |=  (m_nIconsForceOn);
+    nIcons &= ~(m_nIconsForceOff);
+    if(m_nIconsForceOn & eIconDiscRunSpin) {
+      bUpdateIcons |= (0 == (nCnt % 4));
+      nIcons &= ~(eIconDiscSpinBackward);
     }
 
     if(bUpdateIcons || nIcons != nLastIcons) {
@@ -793,4 +806,44 @@ bool ciMonWatch::SetFont(const char *szFont) {
     return false;
 }
 
+
+
+
+eIconState ciMonWatch::ForceIcon(unsigned int nIcon, eIconState nState) {
+
+  unsigned int nIconOff = nIcon;
+  if(nIconOff & eIconTopMask)
+    nIconOff |= eIconTopMask;
+  else if(nIconOff & eIconSpeakerMask)
+    nIconOff |= eIconSpeakerMask;
+  else if(nIconOff & eIconBR_Mask)
+    nIconOff |= eIconBR_Mask;
+  else if(nIconOff & eIconBM_Mask)
+    nIconOff |= eIconBM_Mask;
+  else if(nIconOff & eIconBL_Mask)
+    nIconOff |= eIconBL_Mask;
+  
+  switch(nState) {
+    case eIconStateAuto:
+      m_nIconsForceOn   &= ~(nIconOff);
+      m_nIconsForceOff  &= ~(nIconOff);
+      m_nIconsForceMask &= ~(nIconOff);
+      break;
+    case eIconStateOn:
+      m_nIconsForceOn   |=   nIcon;
+      m_nIconsForceOff  &= ~(nIconOff);
+      m_nIconsForceMask |=   nIconOff;
+      break;
+    case eIconStateOff:
+      m_nIconsForceOff  |=   nIcon;
+      m_nIconsForceOn   &= ~(nIconOff);
+      m_nIconsForceMask |=   nIconOff;
+      break;
+    default:
+      break;
+  }
+  if(m_nIconsForceOn  & nIcon) return eIconStateOn;
+  if(m_nIconsForceOff & nIcon) return eIconStateOff;
+  return eIconStateAuto;
+}
 
