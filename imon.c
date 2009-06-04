@@ -205,25 +205,39 @@ bool ciMonLCD::SendCmdShutdown() {
  * Show the big clock. We need to set it to the current time, then it just
  * keeps counting automatically.
  */
-bool ciMonLCD::SendCmdClock() {
+bool ciMonLCD::SendCmdClock(time_t tAlarm) {
   time_t tt;
   struct tm l;
   uint64_t data;
+  uint64_t alarm;
 
-	tt = time(NULL);
+  tt = time(NULL);
   localtime_r(&tt, &l);
+  
+  data = this->cmd_display;
+  alarm = this->cmd_clear_alarm;
 
-	data = this->cmd_display;
-	data += ((uint64_t) l.tm_sec << 48);
-	data += ((uint64_t) l.tm_min << 40);
-	data += ((uint64_t) l.tm_hour << 32);
-	data += ((uint64_t) l.tm_mday << 24);
-	data += ((uint64_t) l.tm_mon << 16);
-	data += (((uint64_t) l.tm_year) << 8);
-	data += 0x80;
+  data += ((uint64_t) l.tm_sec  << 48);
+  data += ((uint64_t) l.tm_min  << 40);
+  data += ((uint64_t) l.tm_hour << 32); 
+  data += ((uint64_t) l.tm_mday << 24);
+  data += ((uint64_t) l.tm_mon  << 16);
+  data += ((uint64_t) l.tm_year << 8);
+
+  if(!tAlarm) {
+    data += 0x80;
+  } else {
+    data += 0x24; // Works for me on 0038 (need check for ffdc)
+
+    localtime_r(&tAlarm, &l);
+    alarm += ((uint64_t) l.tm_min  << 24);
+    alarm += ((uint64_t) l.tm_hour << 16);
+    alarm += ((uint64_t) l.tm_mday << 8);
+    alarm += ((uint64_t) l.tm_mon  << 0);
+  }
 
 	return SendCmd(data)
-         &&	SendCmd(this->cmd_clear_alarm);
+         && SendCmd(alarm);
 }
 
 /**

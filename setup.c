@@ -29,6 +29,7 @@
 #define DEFAULT_WIDTH        96
 #define DEFAULT_HEIGHT       16
 #define DEFAULT_FONT         "Sans:Bold"
+#define DEFAULT_WAKEUP       5
 
 /// The one and only Stored setup data
 cIMonSetup theSetup;
@@ -42,6 +43,8 @@ cIMonSetup::cIMonSetup(void)
 
   m_nWidth = DEFAULT_WIDTH;
   m_nHeight = DEFAULT_HEIGHT;
+
+  m_nWakeup = DEFAULT_WAKEUP;
 
   strncpy(m_szFont,DEFAULT_FONT,sizeof(m_szFont));
 }
@@ -59,6 +62,8 @@ cIMonSetup& cIMonSetup::operator = (const cIMonSetup& x)
 
   m_nWidth = x.m_nWidth;
   m_nHeight = x.m_nHeight;
+
+  m_nWakeup = x.m_nWakeup;
 
   strncpy(m_szFont,x.m_szFont,sizeof(m_szFont));
 
@@ -136,6 +141,17 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
     return true;
   }
 
+  // Wakeup
+  if(!strcasecmp(szName, "Wakeup")) {
+    int n = atoi(szValue);
+    if ((n < 0) || (n > 1440)) {
+		    esyslog("iMonLCD: Wakeup must be between 0 and 1440; using default %d",
+		           DEFAULT_WAKEUP);
+		    n = DEFAULT_WAKEUP;
+    }
+    m_nWakeup = n;
+    return true;
+  }
   //Unknow parameter
   return false;
 }
@@ -153,6 +169,7 @@ void ciMonMenuSetup::Store(void)
   SetupStore("DiscMode",   theSetup.m_bDiscMode);
   SetupStore("Contrast",   theSetup.m_nContrast);
   SetupStore("Font",       theSetup.m_szFont);
+  SetupStore("Wakeup",     theSetup.m_nWakeup);
 }
 
 ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
@@ -182,10 +199,15 @@ ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
   szExitModes[eOnExitMode_SHOWCLOCK]    = tr("Showing clock");
   szExitModes[eOnExitMode_BLANKSCREEN]  = tr("Turning backlight off");
   szExitModes[eOnExitMode_NEXTTIMER]    = tr("Showing next timer");
+  szExitModes[eOnExitMode_WAKEUP]       = tr("Wakeup on next timer");
 
   Add(new cMenuEditStraItem (tr("Exit mode"),           
         &m_tmpSetup.m_nOnExit,
         memberof(szExitModes), szExitModes));
+
+  Add(new cMenuEditIntItem (tr("Ahead time to awaken (min)"),
+        &m_tmpSetup.m_nWakeup,        
+        0, 1440));
 
 /* Adjust need add moment restart
   Add(new cMenuEditIntItem (tr("Display width"),           

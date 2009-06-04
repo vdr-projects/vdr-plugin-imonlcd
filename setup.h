@@ -23,7 +23,8 @@ enum eOnExitMode {
   ,eOnExitMode_SHOWCLOCK   = 1 /**< Show the big clock */
   ,eOnExitMode_BLANKSCREEN = 2 /**< Blank the device completely */
   ,eOnExitMode_NEXTTIMER   = 3 /**< Show next active timer */
-  ,eOnExitMode_LASTITEM    = 3
+  ,eOnExitMode_WAKEUP      = 4 /**< Show the big clock and wakeup on next active timer */
+  ,eOnExitMode_LASTITEM    = 4
 };
 
 struct cIMonSetup 
@@ -36,6 +37,8 @@ struct cIMonSetup
   int          m_nHeight;
 
   char         m_szFont[256];
+
+  int          m_nWakeup;
 
   cIMonSetup(void);
   cIMonSetup(const cIMonSetup& x);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-imonlcd-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2009-05-30 13:41+0200\n"
+"POT-Creation-Date: 2009-06-04 15:25+0200\n"
 "PO-Revision-Date: 2009-05-23 16:20+0100\n"
 "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
 "Language-Team: \n"
@@ -51,8 +51,14 @@ msgstr "Spegni retroilluminazione"
 msgid "Showing next timer"
 msgstr ""
 
+msgid "Wakeup on next timer"
+msgstr ""
+
 msgid "Exit mode"
 msgstr "Modalità d'uscita"
+
+msgid "Ahead time to awaken (min)"
+msgstr ""
 
 msgid "None active timer"
 msgstr ""

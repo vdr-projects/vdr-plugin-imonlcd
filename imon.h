@@ -112,7 +112,7 @@ protected:
   int lengthToPixels(int length);
 
   bool SendCmd(const uint64_t & cmdData);
-  bool SendCmdClock();
+  bool SendCmdClock(time_t tAlarm);
   bool SendCmdShutdown();
   bool Contrast(int nContrast);
 public:
