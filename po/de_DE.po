@@ -12,7 +12,7 @@ msgstr ""
 "Last-Translator: Andreas Brachold <vdr07 AT deltab de>\n"
 "Language-Team: Andreas Brachold <vdr07 AT deltab de>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Control a iMON LCD"
@@ -37,7 +37,7 @@ msgid "Full disc"
 msgstr "Volle Scheibe"
 
 msgid "Do nothing"
-msgstr "Nicht unternehmen"
+msgstr "Nichts unternehmen"
 
 msgid "Showing clock"
 msgstr "Uhrzeit anzeigen"
@@ -45,16 +45,16 @@ msgstr "Uhrzeit anzeigen"
 msgid "Turning backlight off"
 msgstr "Abschalten der Anzeige"
 
-msgid "Showing next timer"
-msgstr "N‰chsten Timer anzeigen"
+msgid "Show next timer"
+msgstr "N√§chsten Timer anzeigen"
 
-msgid "Wakeup on next timer"
-msgstr "Aufwachen zum n‰chsten Timer"
+msgid "Wake up on next timer"
+msgstr "Aufwachen zum n√§chsten Timer"
 
 msgid "Exit mode"
 msgstr "Ende Modus"
 
-msgid "Ahead time to awaken (min)"
+msgid "Margin time at wake up (min)"
 msgstr "Vorlaufzeit zum Aufwachen (min)"
 
 msgid "None active timer"

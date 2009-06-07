@@ -111,6 +111,31 @@ Possible options are:
      vdr -P'imonlcd'
      vdr -P'imonlcd -d /dev/lcd0 -p ffdc'
 
+Setup options
+-------------
+This options are editable at run time. (Menu: Setup > Plugin > imonlcd ... )
+
+* Contrast 
+  - Set contrast from display. (Default: 200)
+
+* Default font 
+  - Used font, there should installed like other FreeType supported fonts 
+
+* Disc spinning mode
+  - Mode of disc icons at top left corner (used as playback notification) 
+    Options are Slim disc/Full disc
+
+* Exit mode
+  - Do nothing - Just leave the "last" message there
+  - Showing clock - Show the big clock
+  - Turning backlight off - Blank the device completely
+  - Show next timer - Show time and title of next timer
+  - Wake up on next timer - Use display to wake up the VDR-PC, at next active timer
+
+* Margin time at wake up (min)
+  - Define a margin time, if wake up on exit mode used. (Default: 5 minutes)
+
+
 
 Plugin SVDRP commands
 ---------------------
