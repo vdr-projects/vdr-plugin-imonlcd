@@ -286,8 +286,8 @@ bool ciMonLCD::flush()
 	unsigned char msb;
 	int offset = 0;
 
-  if(this->imon_fd<0) {
-		esyslog("iMonLCD: error writing to dead file descriptor");
+  if(!this->isopen()) {
+    esyslog("iMonLCD: error flush frame to dead file descriptor");
     return false;
   }
 
@@ -504,8 +504,9 @@ bool ciMonLCD::SendCmd(const uint64_t & cmdData) {
 	unsigned int i;
 	unsigned char buf[8];
   
-  if(this->imon_fd<0) {
-		esyslog("iMonLCD: error writing to dead file descriptor");
+  if(!this->isopen()) {
+    dsyslog("iMonLCD: can't write : %08llx", cmdData);
+    esyslog("iMonLCD: error writing to dead file descriptor");
     return false;
   }
   //dsyslog("iMonLCD: writing : %08llx", cmdData);

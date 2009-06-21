@@ -120,59 +120,59 @@ void ciMonWatch::close() {
     Cancel();
   }
 
-  cTimer* t = Timers.GetNextActiveTimer();    
+  if(this->isopen()) {
+    cTimer* t = Timers.GetNextActiveTimer();    
 
-  switch(theSetup.m_nOnExit) {
-    case eOnExitMode_NEXTTIMER: {
-      isyslog("iMonLCD: closing, show only next timer.");
-      this->setLineLength(0,0,0,0);
+    switch(theSetup.m_nOnExit) {
+      case eOnExitMode_NEXTTIMER: {
+        isyslog("iMonLCD: closing, show only next timer.");
+        this->setLineLength(0,0,0,0);
 
-      this->clear();
-      if(t) {
-        struct tm l;
-        cString topic;
-        time_t tn = time(NULL);
-        time_t tt = t->StartTime();
-        localtime_r(&tt, &l);
-        if((tt - tn) > 86400) {
-          // next timer more then 24h 
-          topic = cString::sprintf("%d. %02d:%02d %s", l.tm_mday, l.tm_hour, l.tm_min, t->File());
+        this->clear();
+        if(t) {
+          struct tm l;
+          cString topic;
+          time_t tn = time(NULL);
+          time_t tt = t->StartTime();
+          localtime_r(&tt, &l);
+          if((tt - tn) > 86400) {
+            // next timer more then 24h 
+            topic = cString::sprintf("%d. %02d:%02d %s", l.tm_mday, l.tm_hour, l.tm_min, t->File());
+          } else {
+            // next timer (today)
+            topic = cString::sprintf("%02d:%02d %s", l.tm_hour, l.tm_min, t->File());
+          }
+          this->DrawText(0,0,topic);
+          this->icons(eIconTime);
         } else {
-          // next timer (today)
-          topic = cString::sprintf("%02d:%02d %s", l.tm_hour, l.tm_min, t->File());
+          this->DrawText(0,0,tr("None active timer"));
+          this->icons(0);
         }
-        this->DrawText(0,0,topic);
-        this->icons(eIconTime);
-      } else {
-        this->DrawText(0,0,tr("None active timer"));
-        this->icons(0);
+        this->flush();
+        break;
       }
-      this->flush();
-      break;
+      case eOnExitMode_SHOWMSG: {
+        isyslog("iMonLCD: closing, leaving \"last\" message.");
+        break;
+      } 
+      case eOnExitMode_BLANKSCREEN: {
+        isyslog("iMonLCD: closing, turning backlight off.");
+        SendCmdShutdown();
+        break;
+      } 
+      case eOnExitMode_WAKEUP: {
+        isyslog("iMonLCD: closing, set wakeup time and showing clock.");
+        SendCmdClock(t ? t->StartTime() - (theSetup.m_nWakeup * 60) : NULL);
+        break;
+      } 
+      default:
+      case eOnExitMode_SHOWCLOCK: {
+        isyslog("iMonLCD: closing, showing clock.");
+        SendCmdClock(NULL);
+        break;
+      } 
     }
-    case eOnExitMode_SHOWMSG: {
-      isyslog("iMonLCD: closing, leaving \"last\" message.");
-      break;
-    } 
-    case eOnExitMode_BLANKSCREEN: {
-      isyslog("iMonLCD: closing, turning backlight off.");
-      SendCmdShutdown();
-      break;
-    } 
-    case eOnExitMode_WAKEUP: {
-      isyslog("iMonLCD: closing, set wakeup time and showing clock.");
-      SendCmdClock(t ? t->StartTime() - (theSetup.m_nWakeup * 60) : NULL);
-      break;
-    } 
-    default:
-    case eOnExitMode_SHOWCLOCK: {
-      isyslog("iMonLCD: closing, showing clock.");
-      SendCmdClock(NULL);
-      break;
-    } 
   }
-
-
   ciMonLCD::close();
 }
 

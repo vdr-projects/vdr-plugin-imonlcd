@@ -122,7 +122,7 @@ public:
   virtual int open(const char* szDevice, eProtocol pro);
   virtual void close ();
 
-
+  bool isopen() const { return imon_fd >= 0; }
   void clear ();
   int DrawText(int x, int y, const char* string);
   bool flush ();
