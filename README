@@ -59,23 +59,34 @@ Once that finishes, run the following commands to install the modules:
 
 At this point, you've got LIRC installed, and you might like to take some time
 to set up your remote (if you've got one). 
+
 That step is outside the scope of these instructions, so I'll just skip that 
 and move on to install vdr-plugin-imonlcd now.
 
 
 Install vdr-plugin-imonlcd:
 ---------------------------
-Unpack the vdr-plugin-imonlcd tarball to $VDRSOURCE/PLUGINS/src directory
+Unpack the vdr-plugin-imonlcd tarball to $VDRSOURCE/PLUGINS/src directory.
+Variable $VDRSOURCE stands for a directory, where source archive of VDR package 
+was be decompressed.
 
-#> cd /usr/local/src/vdr/PLUGINS/src
+#> cd $VDRSOURCE/PLUGINS/src
 #> tar -xzvf vdr-imonlcd-0.0.1.tgz
 #> ln -s imonlcd-0.0.1 imon
 
 Compile the plugin (from VDR's source directory)
 
-#> cd /usr/local/src/vdr/PLUGINS/src
+Change the working directory to VDR source root and compile this plugin 
+like all other VDR plugins.
+
+#> cd $VDRSOURCE
 #> make plugins
+
+After everything has been compiled without errors, copy the plugin to their 
+target directory.
+
 #> make install
+
 
 Check follow requirements 
 -------------------------
