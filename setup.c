@@ -30,6 +30,7 @@
 #define DEFAULT_HEIGHT       16
 #define DEFAULT_FONT         "Sans:Bold"
 #define DEFAULT_WAKEUP       5
+#define DEFAULT_TWO_LINE_MODE	0
 
 /// The one and only Stored setup data
 cIMonSetup theSetup;
@@ -45,6 +46,7 @@ cIMonSetup::cIMonSetup(void)
   m_nHeight = DEFAULT_HEIGHT;
 
   m_nWakeup = DEFAULT_WAKEUP;
+  m_bTwoLineMode = DEFAULT_TWO_LINE_MODE;
 
   strncpy(m_szFont,DEFAULT_FONT,sizeof(m_szFont));
 }
@@ -64,6 +66,7 @@ cIMonSetup& cIMonSetup::operator = (const cIMonSetup& x)
   m_nHeight = x.m_nHeight;
 
   m_nWakeup = x.m_nWakeup;
+  m_bTwoLineMode = x.m_bTwoLineMode;
 
   strncpy(m_szFont,x.m_szFont,sizeof(m_szFont));
 
@@ -152,6 +155,24 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
     m_nWakeup = n;
     return true;
   }
+
+  // Two Line Mode
+  if(!strcasecmp(szName, "TwoLineMode")) {
+    int n = atoi(szValue);
+    if ((n != 0) && (n != 1))
+    {
+      esyslog("iMonLCD: TwoLineMode must be 0 or 1. using default %d", 
+              DEFAULT_TWO_LINE_MODE );
+      n = DEFAULT_TWO_LINE_MODE;
+    }
+
+    if (n) {
+      m_bTwoLineMode = 1;
+    } else {
+      m_bTwoLineMode = 0;
+    }
+    return true;
+  }
   //Unknow parameter
   return false;
 }
@@ -170,6 +191,7 @@ void ciMonMenuSetup::Store(void)
   SetupStore("Contrast",   theSetup.m_nContrast);
   SetupStore("Font",       theSetup.m_szFont);
   SetupStore("Wakeup",     theSetup.m_nWakeup);
+  SetupStore("TwoLineMode",theSetup.m_bTwoLineMode);
 }
 
 ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
@@ -193,6 +215,9 @@ ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
         &m_tmpSetup.m_bDiscMode,    
         tr("Slim disc"), tr("Full disc")));
 
+  Add(new cMenuEditBoolItem(tr("Render mode"),                    
+        &m_tmpSetup.m_bTwoLineMode,    
+        tr("Single line"), tr("Dual lines")));
 
   static const char * szExitModes[eOnExitMode_LASTITEM];
   szExitModes[eOnExitMode_SHOWMSG]      = tr("Do nothing");
@@ -225,8 +250,9 @@ eOSState ciMonMenuSetup::ProcessKey(eKeys nKey)
   if(nKey == kOk) {
     // Store edited Values
     Utf8Strn0Cpy(m_tmpSetup.m_szFont, fontNames[fontIndex], sizeof(m_tmpSetup.m_szFont));
-    if (0 != strcmp(m_tmpSetup.m_szFont, theSetup.m_szFont)) {
-        m_pDev->SetFont(m_tmpSetup.m_szFont);
+    if (0 != strcmp(m_tmpSetup.m_szFont, theSetup.m_szFont)
+        || m_tmpSetup.m_bTwoLineMode != theSetup.m_bTwoLineMode) {
+        m_pDev->SetFont(m_tmpSetup.m_szFont, m_tmpSetup.m_bTwoLineMode);
     }
 	}
   return cMenuSetupPage::ProcessKey(nKey);

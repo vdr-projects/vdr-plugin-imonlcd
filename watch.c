@@ -59,8 +59,10 @@ ciMonWatch::ciMonWatch()
 
   m_pControl = NULL;
   replayTitle = NULL;
-  replayShortTitle = NULL;
   replayTitleLast = NULL;
+
+  currentTime = NULL;
+
   m_eWatchMode = eLiveTV;
   m_eVideoMode = eVideoNone;
   m_eAudioMode = eAudioNone;
@@ -96,9 +98,9 @@ ciMonWatch::~ciMonWatch()
     delete replayTitle;
     replayTitle = NULL;
   }
-  if(replayShortTitle) {
-    delete replayShortTitle;
-    replayShortTitle = NULL;
+  if(currentTime) {
+    delete currentTime;
+    currentTime = NULL;
   }
 }
 
@@ -182,7 +184,7 @@ void ciMonWatch::Action(void)
   int nContrast = -1;
 
   unsigned int n;
-  int nCnt = 0;
+  unsigned int nCnt = 0;
   int nLastTopProgressBar = -1;
   int nTopProgressBar = 0;
   int nLastBottomProgressBar = -1;
@@ -213,6 +215,13 @@ void ciMonWatch::Action(void)
         case eReplayFile:     nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopWeb;   break;
         case eReplayImage:    nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopPhoto; break;
         case eReplayAudioCD:  nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopDVD;   break;
+      }
+
+      // every second the clock need updates.
+	    if (theSetup.m_bTwoLineMode && m_eWatchMode != eLiveTV) {
+        if((0 == (nCnt % 10))) {
+          m_bUpdateScreen |= CurrentTime();
+        }
       }
 
       bFlush = RenderScreen();
@@ -367,25 +376,32 @@ void ciMonWatch::Action(void)
 
 bool ciMonWatch::RenderScreen() {
     cString* scRender;
+    cString* scHeader = NULL;
     bool bForce = m_bUpdateScreen;
     if(osdMessage) {
       scRender = osdMessage;
     } else if(osdItem) {
       scRender = osdItem;
     } else if(m_eWatchMode == eLiveTV) {
+        scHeader = chName;
         if(Program()) {
           bForce = true;
         }
         if(chPresentTitle)
           scRender = chPresentTitle;
-        else
+        else {
+          scHeader = currentTime;
           scRender = chName;
+        }
     } else {
         if(Replay()) {
           bForce = true;
         }
+        scHeader = currentTime;
         scRender = replayTitle;
     }
+
+
     if(bForce) {
       m_nScrollOffset = 0;
       m_bScrollBackward = false;
@@ -393,7 +409,14 @@ bool ciMonWatch::RenderScreen() {
     if(bForce || m_nScrollOffset > 0 || m_bScrollBackward) {
       this->clear();
       if(scRender) {
-        int iRet = this->DrawText(0 - m_nScrollOffset,0,(*scRender));
+    
+        int iRet = -1;
+        if(theSetup.m_bTwoLineMode) {
+          iRet = this->DrawText(0 - m_nScrollOffset,8, *scRender);
+        } else {
+          iRet = this->DrawText(0 - m_nScrollOffset,0, *scRender);
+        }
+
         switch(iRet) {
           case 0: 
             if(m_nScrollOffset <= 0) {
@@ -415,10 +438,29 @@ bool ciMonWatch::RenderScreen() {
         }
       }
 
+      if(scHeader && theSetup.m_bTwoLineMode) {
+        this->DrawText(0, 0, *scHeader);
+      }
+
       m_bUpdateScreen = false;
       return true;
     }
     return false;
+}
+
+bool ciMonWatch::CurrentTime() {
+  time_t ts = time(NULL);
+
+  if((ts / 60) != (tsCurrentLast / 60)) {
+
+    if(currentTime)
+      delete currentTime;
+
+    tsCurrentLast = ts;
+    currentTime = new cString(TimeString(ts));
+    return currentTime != NULL;
+  } 
+  return false;
 }
 
 bool ciMonWatch::Replay() {
@@ -810,9 +852,9 @@ void ciMonWatch::OsdStatusMessage(const char *sz)
     }
 }
 
-bool ciMonWatch::SetFont(const char *szFont) {
+bool ciMonWatch::SetFont(const char *szFont, int bTwoLineMode) {
     cMutexLooker m(mutex);
-    if(ciMonLCD::SetFont(szFont)) {
+    if(ciMonLCD::SetFont(szFont, bTwoLineMode)) {
       m_bUpdateScreen = true;
       return true;
     }

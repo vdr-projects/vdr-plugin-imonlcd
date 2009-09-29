@@ -132,7 +132,7 @@ ciMonLCD::~ciMonLCD() {
  */
 int ciMonLCD::open(const char* szDevice, eProtocol pro)
 {
-  if(!SetFont(theSetup.m_szFont)) {
+  if(!SetFont(theSetup.m_szFont,theSetup.m_bTwoLineMode)) {
 		return -1;
   }
 
@@ -636,13 +636,19 @@ int ciMonLCD::lengthToPixels(int length)
 		return (pixLen[32 + length] ^ 0xffffffff);
 }
 
-bool ciMonLCD::SetFont(const char *szFont) {
+bool ciMonLCD::SetFont(const char *szFont, int bTwoLineMode) {
 
   ciMonFont* tmpFont = NULL;
 
   cString sFileName = cFont::GetFontFileName(szFont);
-  if(!isempty(sFileName)) {
-    tmpFont = new ciMonFont(sFileName,12,11);
+  if(!isempty(sFileName))
+  {
+    if (bTwoLineMode)
+    {
+      tmpFont = new ciMonFont(sFileName,6,8);
+    } else {
+      tmpFont = new ciMonFont(sFileName,12,11);
+    }
   } else {
 		esyslog("iMonLCD: unable to find file for font '%s'",szFont);
   }

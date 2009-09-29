@@ -115,8 +115,10 @@ private:
 
   eReplayMode m_eReplayMode;
   cString* replayTitle;
-  cString* replayShortTitle;
   cString* replayTitleLast;
+
+  time_t   tsCurrentLast;
+  cString* currentTime;
 protected:
   virtual void Action(void);
   bool Program();
@@ -124,6 +126,7 @@ protected:
   bool RenderScreen();
   eReplayState ReplayMode() const;
   bool ReplayPosition(int &current, int &total) const;
+  bool CurrentTime();
 public:
   ciMonWatch();
   virtual ~ciMonWatch();
@@ -140,7 +143,7 @@ public:
   void OsdCurrentItem(const char *sz);
   void OsdStatusMessage(const char *sz);
 
-  virtual bool SetFont(const char *szFont);
+  virtual bool SetFont(const char *szFont, int bTwoLineMode);
 
   eIconState ForceIcon(unsigned int nIcon, eIconState nState);
 };

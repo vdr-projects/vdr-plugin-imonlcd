@@ -38,6 +38,7 @@ struct cIMonSetup
   char         m_szFont[256];
 
   int          m_nWakeup;
+  int          m_bTwoLineMode; /** enable two line mode */
 
   cIMonSetup(void);
   cIMonSetup(const cIMonSetup& x);
