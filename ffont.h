@@ -16,7 +16,6 @@
 #define __IMON_FONT_H___
 
 #include <vdr/font.h>
-#include <fontconfig/fontconfig.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "bitmap.h"

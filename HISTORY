@@ -2,6 +2,7 @@ VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
 2009-xx-xx: Version 0.0.3
+- Remove unnecessary include statement (suggest by Anssi Hannula)
 - Add mode to show information on two lines provided by Sven (cokker) (Feature #161)
 
 2009-06-08: Version 0.0.2
