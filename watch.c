@@ -18,6 +18,7 @@
 
 #include "watch.h"
 #include "setup.h"
+#include "ffont.h"
 
 #include <vdr/tools.h>
 
@@ -233,16 +234,15 @@ void ciMonWatch::Action(void)
 
       // every second the clock need updates.
       if((0 == (nCnt % 5))) {
-        if(m_eWatchMode == eLiveTV) {
-     	    if (theSetup.m_bTwoLineMode) {
-            bReDraw = CurrentTime();
-          }
-        } else {
+   	    if (theSetup.m_bTwoLineMode) {
+          bReDraw = CurrentTime();
+        }
+        if(m_eWatchMode != eLiveTV) {
           current = 0;
           total = 0;
     	    if (ReplayPosition(current,total)
                && theSetup.m_bTwoLineMode) {
-            bReDraw = ReplayTime(current,total);
+            bReDraw |= ReplayTime(current,total);
           }
         }
       }
@@ -398,6 +398,8 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
     cString* scRender;
     cString* scHeader = NULL;
     bool bForce = m_bUpdateScreen;
+    bool bAllowCurrentTime = false;
+
     if(osdMessage) {
       scRender = osdMessage;
     } else if(osdItem) {
@@ -408,9 +410,10 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
         if(Program()) {
           bForce = true;
         }
-        if(chPresentTitle)
+        if(chPresentTitle) {
           scRender = chPresentTitle;
-        else {
+          bAllowCurrentTime = true;
+        } else {
           scHeader = currentTime;
           scRender = chName;
         }
@@ -420,6 +423,7 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
         }
         scHeader = replayTime;
         scRender = replayTitle;
+        bAllowCurrentTime = true;
     }
 
 
@@ -434,9 +438,10 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
     
         int iRet = -1;
         if(theSetup.m_bTwoLineMode) {
-          iRet = this->DrawText(0 - m_nScrollOffset,8, *scRender);
+          iRet = this->DrawText(0 - m_nScrollOffset,pFont->Height(), *scRender);
         } else {
-          iRet = this->DrawText(0 - m_nScrollOffset,0, *scRender);
+          int nTop = (theSetup.m_nHeight - pFont->Height())/2;
+          iRet = this->DrawText(0 - m_nScrollOffset,nTop<0?0:nTop, *scRender);
         }
         if(m_bScrollNeeded) {
           switch(iRet) {
@@ -465,6 +470,13 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
       }
 
       if(scHeader && theSetup.m_bTwoLineMode) {
+        if(bAllowCurrentTime && currentTime) {
+          int t = pFont->Width(*currentTime);
+          int w = pFont->Width(*scHeader);
+          if((w + t + 3) < theSetup.m_nWidth && t < theSetup.m_nWidth) {
+            this->DrawText(theSetup.m_nWidth - t, 0, *currentTime);
+          } 
+        }
         this->DrawText(0, 0, *scHeader);
       }
 
@@ -963,9 +975,9 @@ void ciMonWatch::OsdStatusMessage(const char *sz)
     }
 }
 
-bool ciMonWatch::SetFont(const char *szFont, int bTwoLineMode) {
+bool ciMonWatch::SetFont(const char *szFont, int bTwoLineMode, int nBigFontHeight, int nSmallFontHeight) {
     cMutexLooker m(mutex);
-    if(ciMonLCD::SetFont(szFont, bTwoLineMode)) {
+    if(ciMonLCD::SetFont(szFont, bTwoLineMode, nBigFontHeight, nSmallFontHeight)) {
       m_bUpdateScreen = true;
       return true;
     }

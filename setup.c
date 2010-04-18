@@ -31,6 +31,8 @@
 #define DEFAULT_FONT         "Sans:Bold"
 #define DEFAULT_WAKEUP       5
 #define DEFAULT_TWO_LINE_MODE	0
+#define DEFAULT_BIG_FONT_HEIGHT   14
+#define DEFAULT_SMALL_FONT_HEIGHT 7
 
 /// The one and only Stored setup data
 cIMonSetup theSetup;
@@ -47,6 +49,8 @@ cIMonSetup::cIMonSetup(void)
 
   m_nWakeup = DEFAULT_WAKEUP;
   m_bTwoLineMode = DEFAULT_TWO_LINE_MODE;
+  m_nBigFontHeight = DEFAULT_BIG_FONT_HEIGHT;
+  m_nSmallFontHeight = DEFAULT_SMALL_FONT_HEIGHT;
 
   strncpy(m_szFont,DEFAULT_FONT,sizeof(m_szFont));
 }
@@ -67,6 +71,8 @@ cIMonSetup& cIMonSetup::operator = (const cIMonSetup& x)
 
   m_nWakeup = x.m_nWakeup;
   m_bTwoLineMode = x.m_bTwoLineMode;
+  m_nBigFontHeight = x.m_nBigFontHeight;
+  m_nSmallFontHeight = x.m_nSmallFontHeight;
 
   strncpy(m_szFont,x.m_szFont,sizeof(m_szFont));
 
@@ -155,6 +161,28 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
     m_nWakeup = n;
     return true;
   }
+  // BigFont
+  if(!strcasecmp(szName, "BigFont")) {
+    int n = atoi(szValue);
+    if ((n < 5) || (n > 24)) {
+		    esyslog("targaVFD:  BigFont must be between 5 and 24; using default %d",
+		           DEFAULT_BIG_FONT_HEIGHT);
+		    n = DEFAULT_BIG_FONT_HEIGHT;
+    }
+    m_nBigFontHeight = n;
+    return true;
+  }
+  // SmallFont
+  if(!strcasecmp(szName, "SmallFont")) {
+    int n = atoi(szValue);
+    if ((n < 5) || (n > 24)) {
+		    esyslog("targaVFD:  SmallFont must be between 5 and 24; using default %d",
+		           DEFAULT_SMALL_FONT_HEIGHT);
+		    n = DEFAULT_SMALL_FONT_HEIGHT;
+    }
+    m_nSmallFontHeight = n;
+    return true;
+  }
 
   // Two Line Mode
   if(!strcasecmp(szName, "TwoLineMode")) {
@@ -189,6 +217,8 @@ void ciMonMenuSetup::Store(void)
   SetupStore("Contrast",   theSetup.m_nContrast);
   SetupStore("DiscMode",   theSetup.m_bDiscMode);
   SetupStore("Font",       theSetup.m_szFont);
+  SetupStore("BigFont",    theSetup.m_nBigFontHeight);
+  SetupStore("SmallFont",  theSetup.m_nSmallFontHeight);
   SetupStore("Wakeup",     theSetup.m_nWakeup);
   SetupStore("TwoLineMode",theSetup.m_bTwoLineMode);
 }
@@ -209,6 +239,12 @@ ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
 
   Add(new cMenuEditStraItem(tr("Default font"),           
         &fontIndex, fontNames.Size(), &fontNames[0]));
+  Add(new cMenuEditIntItem (tr("Height of big font"),           
+        &m_tmpSetup.m_nBigFontHeight,        
+        5, 24));
+  Add(new cMenuEditIntItem (tr("Height of small font"),           
+        &m_tmpSetup.m_nSmallFontHeight,        
+        5, 24));
 
   Add(new cMenuEditBoolItem(tr("Disc spinning mode"),                    
         &m_tmpSetup.m_bDiscMode,    
@@ -250,8 +286,14 @@ eOSState ciMonMenuSetup::ProcessKey(eKeys nKey)
     // Store edited Values
     Utf8Strn0Cpy(m_tmpSetup.m_szFont, fontNames[fontIndex], sizeof(m_tmpSetup.m_szFont));
     if (0 != strcmp(m_tmpSetup.m_szFont, theSetup.m_szFont)
-        || m_tmpSetup.m_bTwoLineMode != theSetup.m_bTwoLineMode) {
-        m_pDev->SetFont(m_tmpSetup.m_szFont, m_tmpSetup.m_bTwoLineMode);
+        || m_tmpSetup.m_bTwoLineMode != theSetup.m_bTwoLineMode
+        || (!m_tmpSetup.m_bTwoLineMode && (m_tmpSetup.m_nBigFontHeight != theSetup.m_nBigFontHeight))
+        || ( m_tmpSetup.m_bTwoLineMode && (m_tmpSetup.m_nSmallFontHeight != theSetup.m_nSmallFontHeight))
+      ) {
+        m_pDev->SetFont(m_tmpSetup.m_szFont, 
+                        m_tmpSetup.m_bTwoLineMode, 
+                        m_tmpSetup.m_nBigFontHeight, 
+                        m_tmpSetup.m_nSmallFontHeight);
     }
 	}
   return cMenuSetupPage::ProcessKey(nKey);

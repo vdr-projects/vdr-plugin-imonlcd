@@ -35,6 +35,9 @@ struct cIMonSetup
   int          m_nWidth;
   int          m_nHeight;
 
+  int          m_nBigFontHeight;
+  int          m_nSmallFontHeight;
+
   char         m_szFont[256];
 
   int          m_nWakeup;

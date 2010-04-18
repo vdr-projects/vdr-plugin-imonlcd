@@ -88,7 +88,6 @@ class ciMonLCD {
 
 	int imon_fd;
 
-  ciMonFont*   pFont;
 	/* framebuffer and backingstore for current contents */
 	ciMonBitmap* framebuf;
 	ciMonBitmap* backingstore;
@@ -106,6 +105,7 @@ class ciMonLCD {
 	int last_cd_state;
 
 protected:
+  ciMonFont*   pFont;
 
   void setLineLength(int topLine, int botLine, int topProgress, int botProgress);
   void setBuiltinProgressBars(int topLine, int botLine, int topProgress, int botProgress);
@@ -128,7 +128,7 @@ public:
   bool flush ();
 
   bool icons(unsigned int state);
-  virtual bool SetFont(const char *szFont, int m_bTwoLineMode);
+  virtual bool SetFont(const char *szFont, int bTwoLineMode, int nBigFontHeight, int nSmallFontHeight);
 };
 #endif
 
