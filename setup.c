@@ -188,7 +188,6 @@ void ciMonMenuSetup::Store(void)
   SetupStore("OnExit",     theSetup.m_nOnExit);
   SetupStore("Contrast",   theSetup.m_nContrast);
   SetupStore("DiscMode",   theSetup.m_bDiscMode);
-  SetupStore("Contrast",   theSetup.m_nContrast);
   SetupStore("Font",       theSetup.m_szFont);
   SetupStore("Wakeup",     theSetup.m_nWakeup);
   SetupStore("TwoLineMode",theSetup.m_bTwoLineMode);

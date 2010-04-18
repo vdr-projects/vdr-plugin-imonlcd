@@ -89,9 +89,10 @@ private:
 
   int   m_nScrollOffset;
   bool  m_bScrollBackward;
+  bool  m_bScrollNeeded;
   bool  m_bUpdateScreen;
 
-  int   m_nCardIsRecording[16];
+  int   m_nCardIsRecording[MAXDEVICES];
 
   unsigned int m_nIconsForceOn;
   unsigned int m_nIconsForceOff;
@@ -110,12 +111,14 @@ private:
   int   m_nLastVolume;
   bool  m_bVolumeMute;
 
+  cString*    osdTitle;
   cString*    osdItem;
   cString*    osdMessage;
 
   eReplayMode m_eReplayMode;
   cString* replayTitle;
   cString* replayTitleLast;
+  cString* replayTime;
 
   time_t   tsCurrentLast;
   cString* currentTime;
@@ -123,10 +126,12 @@ protected:
   virtual void Action(void);
   bool Program();
   bool Replay();
-  bool RenderScreen();
+  bool RenderScreen(bool bRedraw);
   eReplayState ReplayMode() const;
   bool ReplayPosition(int &current, int &total) const;
   bool CurrentTime();
+  bool ReplayTime(int current, int total);
+  const char * FormatReplayTime(int current, int total) const;
 public:
   ciMonWatch();
   virtual ~ciMonWatch();
@@ -137,9 +142,10 @@ public:
   void Replaying(const cControl *pControl, const char *szName, const char *szFileName, bool bOn);
   void Recording(const cDevice *pDevice, const char *szName, const char *szFileName, bool bOn);
   void Channel(int nChannelNumber);
-  bool Volume(int nVolume, bool bAbsolute);
+  void Volume(int nVolume, bool bAbsolute);
 
   void OsdClear();
+  void OsdTitle(const char *sz);
   void OsdCurrentItem(const char *sz);
   void OsdStatusMessage(const char *sz);
 

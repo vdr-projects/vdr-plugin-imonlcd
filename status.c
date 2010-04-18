@@ -78,6 +78,7 @@ void ciMonStatusMonitor::OsdTitle(const char *Title)
 #ifdef MOREDEBUGMSG
   dsyslog("iMonLCD: OsdTitle '%s'", Title);
 #endif
+  m_pDev->OsdTitle(Title);
 }
 
 void ciMonStatusMonitor::OsdStatusMessage(const char *szMessage)

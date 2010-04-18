@@ -53,13 +53,15 @@ ciMonWatch::ciMonWatch()
 
   m_nLastVolume = cDevice::CurrentVolume();
   m_bVolumeMute = false;
-  
+
+  osdTitle = NULL;  
   osdItem = NULL;
   osdMessage = NULL;
 
   m_pControl = NULL;
   replayTitle = NULL;
   replayTitleLast = NULL;
+  replayTime = NULL;
 
   currentTime = NULL;
 
@@ -69,6 +71,7 @@ ciMonWatch::ciMonWatch()
 
   m_nScrollOffset = -1;
   m_bScrollBackward = false;
+  m_bScrollNeeded = false;
 }
 
 ciMonWatch::~ciMonWatch()
@@ -90,6 +93,10 @@ ciMonWatch::~ciMonWatch()
       delete osdMessage;
       osdMessage = NULL;
   }
+  if(osdTitle) { 
+      delete osdTitle;
+      osdTitle = NULL;
+  }
   if(osdItem) { 
       delete osdItem;
       osdItem = NULL;
@@ -97,6 +104,10 @@ ciMonWatch::~ciMonWatch()
   if(replayTitle) {
     delete replayTitle;
     replayTitle = NULL;
+  }
+  if(replayTime) {
+    delete replayTime;
+    replayTime = NULL;
   }
   if(currentTime) {
     delete currentTime;
@@ -191,6 +202,8 @@ void ciMonWatch::Action(void)
   int nBottomProgressBar = 0;
   eTrackType eAudioTrackType = ttNone;
   int nAudioChannel = 0;
+  int current = 0;
+  int total = 0;
 
   cTimeMs runTime;
 
@@ -201,6 +214,7 @@ void ciMonWatch::Action(void)
     unsigned int nIcons = 0;
     bool bUpdateIcons = false;
     bool bFlush = false;
+    bool bReDraw = false;
     if(m_bShutdown)
       break;
     else {
@@ -218,13 +232,22 @@ void ciMonWatch::Action(void)
       }
 
       // every second the clock need updates.
-	    if (theSetup.m_bTwoLineMode && m_eWatchMode != eLiveTV) {
-        if((0 == (nCnt % 10))) {
-          m_bUpdateScreen |= CurrentTime();
+      if((0 == (nCnt % 5))) {
+        if(m_eWatchMode == eLiveTV) {
+     	    if (theSetup.m_bTwoLineMode) {
+            bReDraw = CurrentTime();
+          }
+        } else {
+          current = 0;
+          total = 0;
+    	    if (ReplayPosition(current,total)
+               && theSetup.m_bTwoLineMode) {
+            bReDraw = ReplayTime(current,total);
+          }
         }
       }
 
-      bFlush = RenderScreen();
+      bFlush = RenderScreen(bReDraw);
       if(m_eWatchMode == eLiveTV) {
           if((chFollowingTime - chPresentTime) > 0) {
             nBottomProgressBar = (time(NULL) - chPresentTime) * 32 / (chFollowingTime - chPresentTime);
@@ -234,50 +257,47 @@ void ciMonWatch::Action(void)
             nBottomProgressBar = 0;
           }
       } else {
-        int current = 0,total = 0;
-        if(ReplayPosition(current,total) && total) {
+        if(total) {
             nBottomProgressBar = current * 32 / total;
             if(nBottomProgressBar > 32) nBottomProgressBar = 32;
             if(nBottomProgressBar < 0)  nBottomProgressBar = 0;
-
-            switch(ReplayMode()) {
-                case eReplayNone:
-                case eReplayPaused:
-                  bUpdateIcons = false;
-                  break;
-                default:
-                case eReplayPlay:
-                  bUpdateIcons = (0 == (nCnt % 4));
-                  nIcons |= eIconDiscRunSpin;
-                  break;
-                case eReplayBackward1:
-                  nIcons |= eIconDiscSpinBackward;
-                case eReplayForward1:
-                  break;
-                  bUpdateIcons = (0 == (nCnt % 3));
-                  nIcons |= eIconDiscRunSpin;
-                case eReplayBackward2:
-                  nIcons |= eIconDiscSpinBackward;
-                case eReplayForward2:
-                  bUpdateIcons = (0 == (nCnt % 2));
-                  nIcons |= eIconDiscRunSpin;
-                  break;
-                case eReplayBackward3:
-                  nIcons |= eIconDiscSpinBackward;
-                case eReplayForward3:
-                  bUpdateIcons = true;
-                  nIcons |= eIconDiscRunSpin;
-                  break;
-            }
-            switch(m_eReplayMode) {
-              case eReplayModeShuffle:       nIcons |= eIconShuffle;  break;
-              case eReplayModeRepeat:        nIcons |= eIconRepeat;  break;
-              case eReplayModeRepeatShuffle: nIcons |= eIconShuffle | eIconRepeat;  break;
-              default: break;
-            }
-
         } else {
             nBottomProgressBar = 0;
+        }
+        switch(ReplayMode()) {
+            case eReplayNone:
+            case eReplayPaused:
+              bUpdateIcons = false;
+              break;
+            default:
+            case eReplayPlay:
+              bUpdateIcons = (0 == (nCnt % 4));
+              nIcons |= eIconDiscRunSpin;
+              break;
+            case eReplayBackward1:
+              nIcons |= eIconDiscSpinBackward;
+            case eReplayForward1:
+              break;
+              bUpdateIcons = (0 == (nCnt % 3));
+              nIcons |= eIconDiscRunSpin;
+            case eReplayBackward2:
+              nIcons |= eIconDiscSpinBackward;
+            case eReplayForward2:
+              bUpdateIcons = (0 == (nCnt % 2));
+              nIcons |= eIconDiscRunSpin;
+              break;
+            case eReplayBackward3:
+              nIcons |= eIconDiscSpinBackward;
+            case eReplayForward3:
+              bUpdateIcons = true;
+              nIcons |= eIconDiscRunSpin;
+              break;
+        }
+        switch(m_eReplayMode) {
+          case eReplayModeShuffle:       nIcons |= eIconShuffle;  break;
+          case eReplayModeRepeat:        nIcons |= eIconRepeat;  break;
+          case eReplayModeRepeatShuffle: nIcons |= eIconShuffle | eIconRepeat;  break;
+          default: break;
         }
       }
 
@@ -374,13 +394,14 @@ void ciMonWatch::Action(void)
   dsyslog("iMonLCD: watch thread closed (pid=%d)", getpid());
 }
 
-bool ciMonWatch::RenderScreen() {
+bool ciMonWatch::RenderScreen(bool bReDraw) {
     cString* scRender;
     cString* scHeader = NULL;
     bool bForce = m_bUpdateScreen;
     if(osdMessage) {
       scRender = osdMessage;
     } else if(osdItem) {
+      scHeader = osdTitle;
       scRender = osdItem;
     } else if(m_eWatchMode == eLiveTV) {
         scHeader = chName;
@@ -397,7 +418,7 @@ bool ciMonWatch::RenderScreen() {
         if(Replay()) {
           bForce = true;
         }
-        scHeader = currentTime;
+        scHeader = replayTime;
         scRender = replayTitle;
     }
 
@@ -405,8 +426,9 @@ bool ciMonWatch::RenderScreen() {
     if(bForce) {
       m_nScrollOffset = 0;
       m_bScrollBackward = false;
+      m_bScrollNeeded = true;
     }
-    if(bForce || m_nScrollOffset > 0 || m_bScrollBackward) {
+    if(bForce || bReDraw || m_nScrollOffset > 0 || m_bScrollBackward) {
       this->clear();
       if(scRender) {
     
@@ -416,25 +438,29 @@ bool ciMonWatch::RenderScreen() {
         } else {
           iRet = this->DrawText(0 - m_nScrollOffset,0, *scRender);
         }
-
-        switch(iRet) {
-          case 0: 
-            if(m_nScrollOffset <= 0) {
+        if(m_bScrollNeeded) {
+          switch(iRet) {
+            case 0: 
+              if(m_nScrollOffset <= 0) {
+                m_nScrollOffset = 0;
+                m_bScrollBackward = false;
+                m_bScrollNeeded = false;
+                break; //Fit to screen
+              }
+              m_bScrollBackward = true;
+            case 2:
+            case 1:
+              if(m_bScrollBackward) m_nScrollOffset -= 2;
+              else                  m_nScrollOffset += 2;
+              if(m_nScrollOffset >= 0) {
+                break;
+              }
+            case -1:
               m_nScrollOffset = 0;
               m_bScrollBackward = false;
-              break; //Fit to screen
-            }
-            m_bScrollBackward = true;
-          case 2:
-          case 1:
-            if(m_bScrollBackward) m_nScrollOffset -= 2;
-            else                  m_nScrollOffset += 2;
-            if(m_nScrollOffset >= 0)
+              m_bScrollNeeded = false;
               break;
-          case -1:
-            m_nScrollOffset = 0;
-            m_bScrollBackward = false;
-            break;
+          }
         }
       }
 
@@ -465,7 +491,9 @@ bool ciMonWatch::CurrentTime() {
 
 bool ciMonWatch::Replay() {
   
-  if(replayTitleLast != replayTitle) {
+  if(!replayTitleLast 
+      || !replayTitle 
+      || strcmp(*replayTitleLast,*replayTitle)) {
     replayTitleLast = replayTitle;
     return true;
   }
@@ -645,6 +673,53 @@ bool ciMonWatch::ReplayPosition(int &current, int &total) const
   return false;
 }
 
+const char * ciMonWatch::FormatReplayTime(int current, int total) const
+{
+    static char s[32];
+#if VDRVERSNUM >= 10701
+    int cs = (current / DEFAULTFRAMESPERSECOND);
+    int ts = (total / DEFAULTFRAMESPERSECOND);
+    bool g = (((current / DEFAULTFRAMESPERSECOND) / 3600) > 0)
+            || (((total / DEFAULTFRAMESPERSECOND) / 3600) > 0);
+#else
+    int cs = (current / FRAMESPERSEC);
+    int ts = (total / FRAMESPERSEC);
+    bool g = (((current / FRAMESPERSEC) / 3600) > 0)
+            || (((total / FRAMESPERSEC) / 3600) > 0);
+#endif
+    int cm = cs / 60;
+    cs %= 60;
+    int tm = ts / 60;
+    ts %= 60;
+
+    if (total > 1) {
+      if(g) {
+        snprintf(s, sizeof(s), "%s (%s)", (const char*)IndexToHMSF(current), (const char*)IndexToHMSF(total));
+      } else {
+        snprintf(s, sizeof(s), "%02d:%02d (%02d:%02d)", cm, cs, tm, ts);
+      } 
+    }
+    else {
+      if(g) {
+        snprintf(s, sizeof(s), "%s", (const char*)IndexToHMSF(current));
+      } else {
+        snprintf(s, sizeof(s), "%02d:%02d", cm, cs);
+      }
+    }
+    return s;
+}
+
+bool ciMonWatch::ReplayTime(int current, int total) {
+    const char * sz = FormatReplayTime(current,total);
+    if(!replayTime || strcmp(sz,*replayTime)) {
+      if(replayTime)
+        delete replayTime;
+      replayTime = new cString(sz);
+      return replayTime != NULL;      
+    }
+    return false;
+}
+
 void ciMonWatch::Recording(const cDevice *pDevice, const char *szName, const char *szFileName, bool bOn)
 {
   cMutexLooker m(mutex);
@@ -748,7 +823,7 @@ bool ciMonWatch::Program() {
 }
 
 
-bool ciMonWatch::Volume(int nVolume, bool bAbsolute)
+void ciMonWatch::Volume(int nVolume, bool bAbsolute)
 {
   cMutexLooker m(mutex);
 
@@ -756,23 +831,24 @@ bool ciMonWatch::Volume(int nVolume, bool bAbsolute)
 
   nAbsVolume = m_nLastVolume;
   if (bAbsolute) {
-      nAbsVolume=100*nVolume/255;
+      nAbsVolume = nVolume;
   } else {
-      nAbsVolume=nAbsVolume+100*nVolume/255;
+      nAbsVolume += nVolume;
+  }
+  if(nAbsVolume > MAXVOLUME) {
+      nAbsVolume = MAXVOLUME;
+  }
+  else if(nAbsVolume < 0) {
+      nAbsVolume = 0;
   }
 
-  bool bStateIsChanged = false;
   if(m_nLastVolume > 0 && 0 == nAbsVolume) {
     m_bVolumeMute = true;
-    bStateIsChanged = true;
   }
   else if(0 == m_nLastVolume && nAbsVolume > 0) {
     m_bVolumeMute = false;
-    bStateIsChanged = true;
   }
   m_nLastVolume = nAbsVolume;
-
-  return bStateIsChanged;
 }
 
 
@@ -783,10 +859,45 @@ void ciMonWatch::OsdClear() {
         osdMessage = NULL;
         m_bUpdateScreen = true;
     }
+    if(osdTitle) { 
+        delete osdTitle;
+        osdTitle = NULL;
+        m_bUpdateScreen = true;
+    }
     if(osdItem) { 
         delete osdItem;
         osdItem = NULL;
         m_bUpdateScreen = true;
+    }
+}
+
+void ciMonWatch::OsdTitle(const char *sz) {
+    char *s = NULL;
+    char *sc = NULL;
+    if(sz && !isempty(sz)) {
+        s = strdup(sz);
+        sc = compactspace(strreplace(s,'\t',' '));
+    }
+    if(sc 
+        && osdTitle 
+        && 0 == strcmp(sc, *osdTitle)) {
+      if(s) {
+        free(s);
+      }
+      return;
+    }
+    cMutexLooker m(mutex);
+    if(osdTitle) { 
+        delete osdTitle;
+        osdTitle = NULL;
+        m_bUpdateScreen = true;
+    }
+    if(sc) {
+          osdTitle = new cString(sc);
+          m_bUpdateScreen = true;
+    }
+    if(s) {
+      free(s);
     }
 }
 
