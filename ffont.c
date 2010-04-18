@@ -82,7 +82,6 @@ ciMonFont::ciMonFont(const char *Name, int CharHeight, int CharWidth)
                }
            }
         else {
-           //int xdpi = (int) ( ( 72.0 * 0.9 ) + 0.5 );
            error = FT_Set_Char_Size(face, // handle to face object
                                     CharWidth  << 6, // CharWidth in 1/64th of points
                                     CharHeight << 6, // CharHeight in 1/64th of points
