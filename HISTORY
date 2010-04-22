@@ -1,5 +1,8 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
+2010-04-22: Version 0.0.4
+- Allow setup font size
+- Show current time, on dual line mode (Request #316)
 
 2010-04-18: Version 0.0.3
 - Remove unnecessary include statement (suggest by Anssi Hannula)
