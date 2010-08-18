@@ -1,5 +1,9 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
+
+2010-08-18
+- update italian translation provided by Diego Pierotto (Feature #406)
+
 2010-04-22: Version 0.0.4
 - Allow setup font size
 - Show current time, on dual line mode (Request #316)

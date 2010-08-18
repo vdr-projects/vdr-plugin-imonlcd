@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: vdr-imonlcd-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
 "POT-Creation-Date: 2010-04-18 18:17+0200\n"
-"PO-Revision-Date: 2009-06-07 23:30+0100\n"
+"PO-Revision-Date: 2010-08-09 20:18+0100\n"
 "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -31,10 +31,10 @@ msgid "Default font"
 msgstr "Carattere predefinito"
 
 msgid "Height of big font"
-msgstr ""
+msgstr "Altezza del carattere grande"
 
 msgid "Height of small font"
-msgstr ""
+msgstr "Altezza del carattere piccolo"
 
 msgid "Disc spinning mode"
 msgstr "Modalità rotazione disco"
@@ -46,13 +46,13 @@ msgid "Full disc"
 msgstr "Disco pieno"
 
 msgid "Render mode"
-msgstr ""
+msgstr "Modalità visione"
 
 msgid "Single line"
-msgstr ""
+msgstr "Linea singola"
 
 msgid "Dual lines"
-msgstr ""
+msgstr "Linee doppie"
 
 msgid "Do nothing"
 msgstr "Non fare nulla"
@@ -80,3 +80,4 @@ msgstr "Nessun timer attivo"
 
 msgid "Unknown title"
 msgstr "Titolo sconosciuto"
+
