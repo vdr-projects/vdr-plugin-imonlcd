@@ -1,7 +1,7 @@
 /*
  * iMON LCD plugin for VDR (C++)
  *
- * (C) 2009 Andreas Brachold <vdr07 AT deltab de>
+ * (C) 2009-2010 Andreas Brachold <vdr07 AT deltab de>
  *
  * This iMON LCD plugin is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as published 
@@ -20,7 +20,7 @@
 #include "status.h"
 #include "setup.h"
 
-static const char *VERSION        = "0.0.4";
+static const char *VERSION        = "0.0.5";
 
 static const char *DEFAULT_LCDDEVICE  = "/dev/lcd0";
 

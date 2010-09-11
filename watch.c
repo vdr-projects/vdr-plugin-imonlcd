@@ -1,7 +1,7 @@
 /*
  * iMON LCD plugin for VDR (C++)
  *
- * (C) 2009 Andreas Brachold <vdr07 AT deltab de>
+ * (C) 2009-2010 Andreas Brachold <vdr07 AT deltab de>
  *
  * This iMON LCD plugin is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as published 
@@ -142,6 +142,7 @@ void ciMonWatch::close() {
         isyslog("iMonLCD: closing, show only next timer.");
         this->setLineLength(0,0,0,0);
 
+        int nTop = (theSetup.m_nHeight - pFont->Height())/2;
         this->clear();
         if(t) {
           struct tm l;
@@ -151,15 +152,26 @@ void ciMonWatch::close() {
           localtime_r(&tt, &l);
           if((tt - tn) > 86400) {
             // next timer more then 24h 
-            topic = cString::sprintf("%d. %02d:%02d %s", l.tm_mday, l.tm_hour, l.tm_min, t->File());
+            topic = cString::sprintf("%d. %02d:%02d", l.tm_mday, l.tm_hour, l.tm_min);
           } else {
             // next timer (today)
-            topic = cString::sprintf("%02d:%02d %s", l.tm_hour, l.tm_min, t->File());
+            topic = cString::sprintf("%02d:%02d", l.tm_hour, l.tm_min);
           }
-          this->DrawText(0,0,topic);
+
+          int w = pFont->Width(topic);
+          if(theSetup.m_bTwoLineMode) {
+            this->DrawText(0,0,topic);
+            if((w + 3) < theSetup.m_nWidth)
+                this->DrawText(w + 3,0,t->Channel()->Name());
+            this->DrawText(0,pFont->Height(), t->File());
+          } else {
+            this->DrawText(0,nTop<0?0:nTop, topic);
+            if((w + 3) < theSetup.m_nWidth)
+                this->DrawText(w + 3,nTop<0?0:nTop, t->File());
+          }
           this->icons(eIconTime);
         } else {
-          this->DrawText(0,0,tr("None active timer"));
+          this->DrawText(0,nTop<0?0:nTop,tr("None active timer"));
           this->icons(0);
         }
         this->flush();

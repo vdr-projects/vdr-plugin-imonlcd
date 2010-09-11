@@ -1,6 +1,9 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
+2010-09-11
+- Show next timer on lines (Feature #427)
+
 2010-08-18
 - update italian translation provided by Diego Pierotto (Feature #406)
 
