@@ -106,6 +106,10 @@ ciMonWatch::~ciMonWatch()
     delete replayTitle;
     replayTitle = NULL;
   }
+  if(replayTitleLast) {
+    delete replayTitleLast;
+    replayTitleLast = NULL;
+  }
   if(replayTime) {
     delete replayTime;
     replayTime = NULL;
@@ -518,7 +522,13 @@ bool ciMonWatch::Replay() {
   if(!replayTitleLast 
       || !replayTitle 
       || strcmp(*replayTitleLast,*replayTitle)) {
-    replayTitleLast = replayTitle;
+    if(replayTitleLast) {
+      delete replayTitleLast;
+      replayTitleLast = NULL;
+    }
+    if(replayTitle) {
+      replayTitleLast = new cString(*replayTitle);
+    }
     return true;
   }
   return false;
