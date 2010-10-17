@@ -30,7 +30,7 @@
 #define DEFAULT_HEIGHT       16
 #define DEFAULT_FONT         "Sans:Bold"
 #define DEFAULT_WAKEUP       5
-#define DEFAULT_TWO_LINE_MODE	0
+#define DEFAULT_TWO_LINE_MODE	eRenderMode_SingleLine
 #define DEFAULT_BIG_FONT_HEIGHT   14
 #define DEFAULT_SMALL_FONT_HEIGHT 7
 
@@ -48,7 +48,7 @@ cIMonSetup::cIMonSetup(void)
   m_nHeight = DEFAULT_HEIGHT;
 
   m_nWakeup = DEFAULT_WAKEUP;
-  m_bTwoLineMode = DEFAULT_TWO_LINE_MODE;
+  m_nRenderMode = DEFAULT_TWO_LINE_MODE;
   m_nBigFontHeight = DEFAULT_BIG_FONT_HEIGHT;
   m_nSmallFontHeight = DEFAULT_SMALL_FONT_HEIGHT;
 
@@ -70,7 +70,7 @@ cIMonSetup& cIMonSetup::operator = (const cIMonSetup& x)
   m_nHeight = x.m_nHeight;
 
   m_nWakeup = x.m_nWakeup;
-  m_bTwoLineMode = x.m_bTwoLineMode;
+  m_nRenderMode = x.m_nRenderMode;
   m_nBigFontHeight = x.m_nBigFontHeight;
   m_nSmallFontHeight = x.m_nSmallFontHeight;
 
@@ -121,7 +121,7 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
   if(!strcasecmp(szName, "Contrast")) {
     int n = atoi(szValue);
     if ((n < 0) || (n > 1000)) {
-		    esyslog("iMonLCD: Contrast must be between 0 and 1000; using default %d",
+		    esyslog("iMonLCD: Contrast must be between 0 and 1000, using default %d",
 		           DEFAULT_CONTRAST);
 		    n = DEFAULT_CONTRAST;
     }
@@ -138,7 +138,7 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
         return true;
       }
     }
-    esyslog("iMonLCD: Font '%s' not found; using default %s", 
+    esyslog("iMonLCD: Font '%s' not found, using default %s", 
         szValue, DEFAULT_FONT);
     strncpy(m_szFont,DEFAULT_FONT,sizeof(m_szFont));
     return true;
@@ -154,7 +154,7 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
   if(!strcasecmp(szName, "Wakeup")) {
     int n = atoi(szValue);
     if ((n < 0) || (n > 1440)) {
-		    esyslog("iMonLCD: Wakeup must be between 0 and 1440; using default %d",
+		    esyslog("iMonLCD: Wakeup must be between 0 and 1440, using default %d",
 		           DEFAULT_WAKEUP);
 		    n = DEFAULT_WAKEUP;
     }
@@ -165,7 +165,7 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
   if(!strcasecmp(szName, "BigFont")) {
     int n = atoi(szValue);
     if ((n < 5) || (n > 24)) {
-		    esyslog("targaVFD:  BigFont must be between 5 and 24; using default %d",
+		    esyslog("iMonLCD:  BigFont must be between 5 and 24, using default %d",
 		           DEFAULT_BIG_FONT_HEIGHT);
 		    n = DEFAULT_BIG_FONT_HEIGHT;
     }
@@ -176,7 +176,7 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
   if(!strcasecmp(szName, "SmallFont")) {
     int n = atoi(szValue);
     if ((n < 5) || (n > 24)) {
-		    esyslog("targaVFD:  SmallFont must be between 5 and 24; using default %d",
+		    esyslog("iMonLCD:  SmallFont must be between 5 and 24, using default %d",
 		           DEFAULT_SMALL_FONT_HEIGHT);
 		    n = DEFAULT_SMALL_FONT_HEIGHT;
     }
@@ -187,20 +187,15 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
   // Two Line Mode
   if(!strcasecmp(szName, "TwoLineMode")) {
     int n = atoi(szValue);
-    if ((n != 0) && (n != 1))
-    {
-      esyslog("iMonLCD: TwoLineMode must be 0 or 1. using default %d", 
-              DEFAULT_TWO_LINE_MODE );
+    if ((n < eRenderMode_SingleLine) || (n >= eRenderMode_LASTITEM)) {
+      esyslog("iMonLCD:  TwoLineMode must be between %d and %d, using default %d", 
+              eRenderMode_SingleLine, eRenderMode_LASTITEM, DEFAULT_TWO_LINE_MODE );
       n = DEFAULT_TWO_LINE_MODE;
     }
-
-    if (n) {
-      m_bTwoLineMode = 1;
-    } else {
-      m_bTwoLineMode = 0;
-    }
+    m_nRenderMode = n;
     return true;
   }
+
   //Unknow parameter
   return false;
 }
@@ -220,7 +215,7 @@ void ciMonMenuSetup::Store(void)
   SetupStore("BigFont",    theSetup.m_nBigFontHeight);
   SetupStore("SmallFont",  theSetup.m_nSmallFontHeight);
   SetupStore("Wakeup",     theSetup.m_nWakeup);
-  SetupStore("TwoLineMode",theSetup.m_bTwoLineMode);
+  SetupStore("TwoLineMode",theSetup.m_nRenderMode);
 }
 
 ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
@@ -250,9 +245,14 @@ ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
         &m_tmpSetup.m_bDiscMode,    
         tr("Slim disc"), tr("Full disc")));
 
-  Add(new cMenuEditBoolItem(tr("Render mode"),                    
-        &m_tmpSetup.m_bTwoLineMode,    
-        tr("Single line"), tr("Dual lines")));
+  static const char * szRenderMode[3];
+  szRenderMode[eRenderMode_SingleLine] = tr("Single line");
+  szRenderMode[eRenderMode_DualLine] = tr("Dual lines");
+  szRenderMode[eRenderMode_SingleTopic] = tr("Only topic");
+
+  Add(new cMenuEditStraItem(tr("Render mode"),                    
+        &m_tmpSetup.m_nRenderMode,    
+        memberof(szRenderMode), szRenderMode));
 
   static const char * szExitModes[eOnExitMode_LASTITEM];
   szExitModes[eOnExitMode_SHOWMSG]      = tr("Do nothing");
@@ -286,12 +286,12 @@ eOSState ciMonMenuSetup::ProcessKey(eKeys nKey)
     // Store edited Values
     Utf8Strn0Cpy(m_tmpSetup.m_szFont, fontNames[fontIndex], sizeof(m_tmpSetup.m_szFont));
     if (0 != strcmp(m_tmpSetup.m_szFont, theSetup.m_szFont)
-        || m_tmpSetup.m_bTwoLineMode != theSetup.m_bTwoLineMode
-        || (!m_tmpSetup.m_bTwoLineMode && (m_tmpSetup.m_nBigFontHeight != theSetup.m_nBigFontHeight))
-        || ( m_tmpSetup.m_bTwoLineMode && (m_tmpSetup.m_nSmallFontHeight != theSetup.m_nSmallFontHeight))
+        || m_tmpSetup.m_nRenderMode != theSetup.m_nRenderMode
+        || ( m_tmpSetup.m_nRenderMode != eRenderMode_DualLine && (m_tmpSetup.m_nBigFontHeight != theSetup.m_nBigFontHeight))
+        || ( m_tmpSetup.m_nRenderMode == eRenderMode_DualLine && (m_tmpSetup.m_nSmallFontHeight != theSetup.m_nSmallFontHeight))
       ) {
         m_pDev->SetFont(m_tmpSetup.m_szFont, 
-                        m_tmpSetup.m_bTwoLineMode, 
+                        m_tmpSetup.m_nRenderMode == eRenderMode_DualLine ? true : false, 
                         m_tmpSetup.m_nBigFontHeight, 
                         m_tmpSetup.m_nSmallFontHeight);
     }

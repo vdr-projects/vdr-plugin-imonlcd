@@ -133,7 +133,7 @@ ciMonLCD::~ciMonLCD() {
 int ciMonLCD::open(const char* szDevice, eProtocol pro)
 {
   if(!SetFont(theSetup.m_szFont, 
-              theSetup.m_bTwoLineMode, 
+              theSetup.m_nRenderMode == eRenderMode_DualLine ? true : false,
               theSetup.m_nBigFontHeight, 
               theSetup.m_nSmallFontHeight)) {
 		return -1;
@@ -639,7 +639,7 @@ int ciMonLCD::lengthToPixels(int length)
 		return (pixLen[32 + length] ^ 0xffffffff);
 }
 
-bool ciMonLCD::SetFont(const char *szFont, int bTwoLineMode, int nBigFontHeight, int nSmallFontHeight) {
+bool ciMonLCD::SetFont(const char *szFont, bool bTwoLineMode, int nBigFontHeight, int nSmallFontHeight) {
 
   ciMonFont* tmpFont = NULL;
 

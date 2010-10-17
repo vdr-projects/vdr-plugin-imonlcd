@@ -128,7 +128,7 @@ public:
   bool flush ();
 
   bool icons(unsigned int state);
-  virtual bool SetFont(const char *szFont, int bTwoLineMode, int nBigFontHeight, int nSmallFontHeight);
+  virtual bool SetFont(const char *szFont, bool bTwoLineMode, int nBigFontHeight, int nSmallFontHeight);
 };
 #endif
 

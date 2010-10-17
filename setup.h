@@ -26,6 +26,13 @@ enum eOnExitMode {
   ,eOnExitMode_LASTITEM
 };
 
+enum eRenderMode {
+   eRenderMode_SingleLine   /**< Render screen at single line */
+  ,eRenderMode_DualLine     /**< Render screen at dual line */
+  ,eRenderMode_SingleTopic  /**< Render screen at single line, only names */
+  ,eRenderMode_LASTITEM
+};
+ 
 struct cIMonSetup 
 {
   int          m_nOnExit;
@@ -41,7 +48,7 @@ struct cIMonSetup
   char         m_szFont[256];
 
   int          m_nWakeup;
-  int          m_bTwoLineMode; /** enable two line mode */
+  int          m_nRenderMode; /** enable two line mode */
 
   cIMonSetup(void);
   cIMonSetup(const cIMonSetup& x);

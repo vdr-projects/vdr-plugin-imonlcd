@@ -163,7 +163,7 @@ void ciMonWatch::close() {
           }
 
           int w = pFont->Width(topic);
-          if(theSetup.m_bTwoLineMode) {
+          if(theSetup.m_nRenderMode == eRenderMode_DualLine) {
             this->DrawText(0,0,topic);
             if((w + 3) < theSetup.m_nWidth)
                 this->DrawText(w + 3,0,t->Channel()->Name());
@@ -250,14 +250,14 @@ void ciMonWatch::Action(void)
 
       // every second the clock need updates.
       if((0 == (nCnt % 5))) {
-   	    if (theSetup.m_bTwoLineMode) {
+   	    if (theSetup.m_nRenderMode == eRenderMode_DualLine) {
           bReDraw = CurrentTime();
         }
         if(m_eWatchMode != eLiveTV) {
           current = 0;
           total = 0;
     	    if (ReplayPosition(current,total)
-               && theSetup.m_bTwoLineMode) {
+               && theSetup.m_nRenderMode == eRenderMode_DualLine) {
             bReDraw |= ReplayTime(current,total);
           }
         }
@@ -426,7 +426,7 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
         if(Program()) {
           bForce = true;
         }
-        if(chPresentTitle) {
+        if(chPresentTitle && theSetup.m_nRenderMode != eRenderMode_SingleTopic) {
           scRender = chPresentTitle;
           bAllowCurrentTime = true;
         } else {
@@ -453,7 +453,7 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
       if(scRender) {
     
         int iRet = -1;
-        if(theSetup.m_bTwoLineMode) {
+        if(theSetup.m_nRenderMode == eRenderMode_DualLine) {
           iRet = this->DrawText(0 - m_nScrollOffset,pFont->Height(), *scRender);
         } else {
           int nTop = (theSetup.m_nHeight - pFont->Height())/2;
@@ -485,7 +485,7 @@ bool ciMonWatch::RenderScreen(bool bReDraw) {
         }
       }
 
-      if(scHeader && theSetup.m_bTwoLineMode) {
+      if(scHeader && theSetup.m_nRenderMode == eRenderMode_DualLine) {
         if(bAllowCurrentTime && currentTime) {
           int t = pFont->Width(*currentTime);
           int w = pFont->Width(*scHeader);
@@ -997,7 +997,7 @@ void ciMonWatch::OsdStatusMessage(const char *sz)
     }
 }
 
-bool ciMonWatch::SetFont(const char *szFont, int bTwoLineMode, int nBigFontHeight, int nSmallFontHeight) {
+bool ciMonWatch::SetFont(const char *szFont, bool bTwoLineMode, int nBigFontHeight, int nSmallFontHeight) {
     cMutexLooker m(mutex);
     if(ciMonLCD::SetFont(szFont, bTwoLineMode, nBigFontHeight, nSmallFontHeight)) {
       m_bUpdateScreen = true;

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-imonlcd-plugin 0.0.3\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2010-04-18 18:17+0200\n"
+"POT-Creation-Date: 2010-10-09 19:26+0200\n"
 "PO-Revision-Date: 2010-04-18 18:21+0200\n"
 "Last-Translator: Andreas Brachold <vdr07 AT deltab de>\n"
 "Language-Team: Andreas Brachold <vdr07 AT deltab de>\n"
@@ -42,14 +42,17 @@ msgstr "Schlanke Scheibe"
 msgid "Full disc"
 msgstr "Volle Scheibe"
 
-msgid "Render mode"
-msgstr "Anzeigemodus"
-
 msgid "Single line"
 msgstr "Einzelne Zeile"
 
 msgid "Dual lines"
 msgstr "Zwei Zeilen"
+
+msgid "Only topic"
+msgstr "Nur Titel"
+
+msgid "Render mode"
+msgstr "Anzeigemodus"
 
 msgid "Do nothing"
 msgstr "Nichts unternehmen"
