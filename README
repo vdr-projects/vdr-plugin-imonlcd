@@ -131,6 +131,13 @@ This options are editable at run time. (Menu: Setup > Plugin > imonlcd ... )
 
 * Default font 
   - Used font, there should installed like other FreeType supported fonts 
+* Height of big font
+* Height of small font
+
+* Render mode
+  - Single line
+  - Dual lines
+  - Single line (Channel names only)
 
 * Disc spinning mode
   - Mode of disc icons at top left corner (used as playback notification) 
