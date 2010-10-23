@@ -32,7 +32,14 @@ enum eRenderMode {
   ,eRenderMode_SingleTopic  /**< Render screen at single line, only names */
   ,eRenderMode_LASTITEM
 };
- 
+
+enum eSuspendMode {
+   eSuspendMode_Never   /**< Suspend display never */
+  ,eSuspendMode_Timed   /**< Suspend display, resume short time */
+  ,eSuspendMode_Ever    /**< Suspend display ever */
+  ,eSuspendMode_LASTITEM
+};
+
 struct cIMonSetup 
 {
   int          m_nOnExit;
@@ -49,6 +56,10 @@ struct cIMonSetup
 
   int          m_nWakeup;
   int          m_nRenderMode; /** enable two line mode */
+
+  int          m_nSuspendMode;
+  int          m_nSuspendTimeOn;
+  int          m_nSuspendTimeOff;
 
   cIMonSetup(void);
   cIMonSetup(const cIMonSetup& x);

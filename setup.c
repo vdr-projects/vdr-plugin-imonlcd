@@ -33,6 +33,7 @@
 #define DEFAULT_TWO_LINE_MODE	eRenderMode_SingleLine
 #define DEFAULT_BIG_FONT_HEIGHT   14
 #define DEFAULT_SMALL_FONT_HEIGHT 7
+#define DEFAULT_SUSPEND_MODE 	eSuspendMode_Never      /**< Suspend display never */
 
 /// The one and only Stored setup data
 cIMonSetup theSetup;
@@ -51,6 +52,9 @@ cIMonSetup::cIMonSetup(void)
   m_nRenderMode = DEFAULT_TWO_LINE_MODE;
   m_nBigFontHeight = DEFAULT_BIG_FONT_HEIGHT;
   m_nSmallFontHeight = DEFAULT_SMALL_FONT_HEIGHT;
+  m_nSuspendMode = DEFAULT_SUSPEND_MODE;
+  m_nSuspendTimeOn = 2200;
+  m_nSuspendTimeOff = 800;
 
   strncpy(m_szFont,DEFAULT_FONT,sizeof(m_szFont));
 }
@@ -73,6 +77,9 @@ cIMonSetup& cIMonSetup::operator = (const cIMonSetup& x)
   m_nRenderMode = x.m_nRenderMode;
   m_nBigFontHeight = x.m_nBigFontHeight;
   m_nSmallFontHeight = x.m_nSmallFontHeight;
+  m_nSuspendMode = x.m_nSuspendMode;
+  m_nSuspendTimeOn = x.m_nSuspendTimeOn;
+  m_nSuspendTimeOff = x.m_nSuspendTimeOff;
 
   strncpy(m_szFont,x.m_szFont,sizeof(m_szFont));
 
@@ -196,6 +203,40 @@ bool cIMonSetup::SetupParse(const char *szName, const char *szValue)
     return true;
   }
 
+  // SuspendMode
+  if(!strcasecmp(szName, "SuspendMode")) {
+    int n = atoi(szValue);
+    if ((n < eSuspendMode_Never) || (n >= eSuspendMode_LASTITEM)) {
+		    esyslog("iMonLCD:  SuspendMode must be between %d and %d, using default %d",
+		           eSuspendMode_Never, eSuspendMode_LASTITEM, DEFAULT_SUSPEND_MODE);
+		    n = DEFAULT_SUSPEND_MODE;
+    }
+    m_nSuspendMode = n;
+    return true;
+  }
+  // SuspendTimeOn
+  if(!strcasecmp(szName, "SuspendTimeOn")) {
+    int n = atoi(szValue);
+    if ((n < 0) || (n >= 2400)) {
+		    esyslog("iMonLCD:  SuspendTimeOn must be between %d and %d, using default %d",
+		           0, 2359, 0);
+		    n = 0;
+    }
+    m_nSuspendTimeOn = n;
+    return true;
+  }
+  // SuspendTimeOff
+  if(!strcasecmp(szName, "SuspendTimeOff")) {
+    int n = atoi(szValue);
+    if ((n < 0) || (n >= 2400)) {
+		    esyslog("iMonLCD:  SuspendTimeOff must be between %d and %d, using default %d",
+		           0, 2359, 0);
+		    n = 0;
+    }
+    m_nSuspendTimeOff = n;
+    return true;
+  }
+
   //Unknow parameter
   return false;
 }
@@ -216,6 +257,9 @@ void ciMonMenuSetup::Store(void)
   SetupStore("SmallFont",  theSetup.m_nSmallFontHeight);
   SetupStore("Wakeup",     theSetup.m_nWakeup);
   SetupStore("TwoLineMode",theSetup.m_nRenderMode);
+  SetupStore("SuspendMode", theSetup.m_nSuspendTimeOn);
+  SetupStore("SuspendTimeOn", theSetup.m_nSuspendTimeOn);
+  SetupStore("SuspendTimeOff", theSetup.m_nSuspendTimeOff);
 }
 
 ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
@@ -278,6 +322,19 @@ ciMonMenuSetup::ciMonMenuSetup(ciMonWatch*    pDev)
         &m_tmpSetup.m_nHeight,        
         0, 240));
 */
+
+  static const char * szSuspendMode[eSuspendMode_LASTITEM];
+  szSuspendMode[eSuspendMode_Never] = tr("Never");
+  szSuspendMode[eSuspendMode_Timed] = tr("Resume on activities");
+  szSuspendMode[eSuspendMode_Ever]  = tr("Only per time");
+
+  Add(new cMenuEditStraItem (tr("Suspend display at night"),           
+        &m_tmpSetup.m_nSuspendMode,
+        memberof(szSuspendMode), szSuspendMode));
+  Add(new cMenuEditTimeItem (tr("Beginning of suspend"),           
+        &m_tmpSetup.m_nSuspendTimeOn));
+  Add(new cMenuEditTimeItem (tr("End time of suspend"),           
+        &m_tmpSetup.m_nSuspendTimeOff));
 }
 
 eOSState ciMonMenuSetup::ProcessKey(eKeys nKey)

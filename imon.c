@@ -176,22 +176,32 @@ int ciMonLCD::open(const char* szDevice, eProtocol pro)
 		esyslog("iMonLCD: unable to create framebuffer backing store");
 		return -1;
 	}
+
+  if(SendCmdInit()) {
+	  Contrast(theSetup.m_nContrast);
+	  dsyslog("iMonLCD: init() done");
+	  return 0;
+  }
+	return -1;
+}
+
+/*
+ * turning backlight off (confirmed for a Silverstone LCD) (as "cybrmage" at
+ * mediaportal pointed out, his LCD is an Antec built-in one and turns completely
+ * off with this command)
+ */
+bool ciMonLCD::SendCmdInit() {
+
   backingstore->SetPixel(0,0);//make dirty
 
-  SendCmd(this->cmd_clear_alarm);
-  SendCmd(this->cmd_display_on);
-	SendCmd(CMD_INIT);	/* unknown, required init command */
-	SendCmd(CMD_SET_ICONS);
-	/* clear the progress-bars on top and bottom of the display */
-	SendCmd(CMD_SET_LINES0);
-	SendCmd(CMD_SET_LINES1);
-	SendCmd(CMD_SET_LINES2);
-
-	Contrast(theSetup.m_nContrast);
-
-	dsyslog("iMonLCD: init() done");
-
-	return 0;
+  return SendCmd(this->cmd_clear_alarm)
+      && SendCmd(this->cmd_display_on)
+	    && SendCmd(CMD_INIT)	/* unknown, required init command */
+	    && SendCmd(CMD_SET_ICONS)
+	    /* clear the progress-bars on top and bottom of the display */
+	    && SendCmd(CMD_SET_LINES0)
+	    && SendCmd(CMD_SET_LINES1)
+	    && SendCmd(CMD_SET_LINES2);
 }
 
 /*

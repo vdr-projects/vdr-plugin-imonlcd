@@ -2,6 +2,7 @@ VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
 2010-
+- Allow turn display off at night (Feature #175)
 - Add render mode "show channel names only" (Feature #426)
 - Show next timer on lines (Feature #427)
 - update italian translation provided by Diego Pierotto (Feature #406)

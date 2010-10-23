@@ -21,6 +21,7 @@
 #include "ffont.h"
 
 #include <vdr/tools.h>
+#include <vdr/shutdown.h>
 
 struct cMutexLooker {
   cMutex& mutex;
@@ -223,6 +224,8 @@ void ciMonWatch::Action(void)
   int total = 0;
 
   cTimeMs runTime;
+  struct tm tm_r;
+  bool bLastSuspend = false;
 
   for (;!m_bShutdown;++nCnt) {
     
@@ -232,176 +235,213 @@ void ciMonWatch::Action(void)
     bool bUpdateIcons = false;
     bool bFlush = false;
     bool bReDraw = false;
+    bool bSuspend = false;
+
     if(m_bShutdown)
       break;
     else {
       cMutexLooker m(mutex);
+      runTime.Set();
 
-      switch(m_eWatchMode) {
-        default:
-        case eLiveTV:         nIcons |= eIconTV;break;
-        case eReplayNormal:   nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopMovie; break;
-        case eReplayMusic:    nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopMusic; break;
-        case eReplayDVD:      nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopDVD;   break;
-        case eReplayFile:     nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopWeb;   break;
-        case eReplayImage:    nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopPhoto; break;
-        case eReplayAudioCD:  nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopDVD;   break;
-      }
-
-      // every second the clock need updates.
-      if((0 == (nCnt % 5))) {
-   	    if (theSetup.m_nRenderMode == eRenderMode_DualLine) {
-          bReDraw = CurrentTime();
+      time_t ts = time(NULL);
+      if(theSetup.m_nSuspendMode != eSuspendMode_Never 
+          && theSetup.m_nSuspendTimeOff != theSetup.m_nSuspendTimeOn) {
+        struct tm *now = localtime_r(&ts, &tm_r);
+        int clock = now->tm_hour * 100 + now->tm_min;
+        if(theSetup.m_nSuspendTimeOff > theSetup.m_nSuspendTimeOn) { //like 8-20
+          bSuspend = (clock >= theSetup.m_nSuspendTimeOn) 
+                  && (clock <= theSetup.m_nSuspendTimeOff);
+        } else { //like 0-8 and 20..24
+          bSuspend = (clock >= theSetup.m_nSuspendTimeOn) 
+                  || (clock <= theSetup.m_nSuspendTimeOff);
         }
-        if(m_eWatchMode != eLiveTV) {
-          current = 0;
-          total = 0;
-    	    if (ReplayPosition(current,total)
-               && theSetup.m_nRenderMode == eRenderMode_DualLine) {
-            bReDraw |= ReplayTime(current,total);
-          }
+        if(theSetup.m_nSuspendMode == eSuspendMode_Timed 
+              && !ShutdownHandler.IsUserInactive()) {
+          bSuspend = false;
         }
       }
-
-      bFlush = RenderScreen(bReDraw);
-      if(m_eWatchMode == eLiveTV) {
-          if((chFollowingTime - chPresentTime) > 0) {
-            nBottomProgressBar = (time(NULL) - chPresentTime) * 32 / (chFollowingTime - chPresentTime);
-            if(nBottomProgressBar > 32) nBottomProgressBar = 32;
-            if(nBottomProgressBar < 0)  nBottomProgressBar = 0;
-          } else {
-            nBottomProgressBar = 0;
-          }
-      } else {
-        if(total) {
-            nBottomProgressBar = current * 32 / total;
-            if(nBottomProgressBar > 32) nBottomProgressBar = 32;
-            if(nBottomProgressBar < 0)  nBottomProgressBar = 0;
+      if(bSuspend != bLastSuspend) {
+        if(bSuspend) {
+          SendCmdShutdown();
         } else {
-            nBottomProgressBar = 0;
+          SendCmdInit();
+          nLastIcons = -1;
+          nContrast = -1;
+          nLastTopProgressBar = -1;
+          nLastBottomProgressBar = -1;
         }
-        switch(ReplayMode()) {
-            case eReplayNone:
-            case eReplayPaused:
-              bUpdateIcons = false;
-              break;
-            default:
-            case eReplayPlay:
-              bUpdateIcons = (0 == (nCnt % 4));
-              nIcons |= eIconDiscRunSpin;
-              break;
-            case eReplayBackward1:
-              nIcons |= eIconDiscSpinBackward;
-            case eReplayForward1:
-              break;
-              bUpdateIcons = (0 == (nCnt % 3));
-              nIcons |= eIconDiscRunSpin;
-            case eReplayBackward2:
-              nIcons |= eIconDiscSpinBackward;
-            case eReplayForward2:
-              bUpdateIcons = (0 == (nCnt % 2));
-              nIcons |= eIconDiscRunSpin;
-              break;
-            case eReplayBackward3:
-              nIcons |= eIconDiscSpinBackward;
-            case eReplayForward3:
-              bUpdateIcons = true;
-              nIcons |= eIconDiscRunSpin;
-              break;
-        }
-        switch(m_eReplayMode) {
-          case eReplayModeShuffle:       nIcons |= eIconShuffle;  break;
-          case eReplayModeRepeat:        nIcons |= eIconRepeat;  break;
-          case eReplayModeRepeatShuffle: nIcons |= eIconShuffle | eIconRepeat;  break;
-          default: break;
-        }
+        bFlush = true;
+        bReDraw = true;
+        bLastSuspend = bSuspend;
       }
 
-      switch(m_eVideoMode) {
-        case eVideoMPG:   nIcons |= eIconBL_MPG;  break;
-        case eVideoDivX:  nIcons |= eIconBL_DIVX;  break;
-        case eVideoXviD:  nIcons |= eIconBL_XVID;  break;
-        case eVideoWMV:   nIcons |= eIconBL_WMV;  break;
-        default:
-        case eVideoNone:  break;
-      }
-
-      if(m_eAudioMode & eAudioMPG) nIcons |= eIconBM_MPG;
-      if(m_eAudioMode & eAudioAC3) nIcons |= eIconBM_AC3;
-      if(m_eAudioMode & eAudioDTS) nIcons |= eIconBM_DTS;
-      if(m_eAudioMode & eAudioWMA) nIcons |= eIconBR_WMA;
-      if(m_eAudioMode & eAudioMP3) nIcons |= eIconBR_MP3;
-      if(m_eAudioMode & eAudioOGG) nIcons |= eIconBR_OGG;
-      if(m_eAudioMode & eAudioWAV) nIcons |= eIconBR_WAV;
-
-      for(n=0;n<memberof(m_nCardIsRecording);++n) {
-          if(0 != m_nCardIsRecording[n]) {
-            nIcons |= eIconRecording;
-            switch(n) {
-              case 0: nIcons |= eIconSRC;  break;
-              case 1: nIcons |= eIconSRC1; break;
-              case 2: nIcons |= eIconSRC2; break;
+      if(!bSuspend) {
+        // every second the clock need updates.
+        if((0 == (nCnt % 5))) {
+     	    if (theSetup.m_nRenderMode == eRenderMode_DualLine) {
+            bReDraw |= CurrentTime();
+          }
+          if(m_eWatchMode != eLiveTV) {
+            current = 0;
+            total = 0;
+      	    if (ReplayPosition(current,total)
+                 && theSetup.m_nRenderMode == eRenderMode_DualLine) {
+              bReDraw |= ReplayTime(current,total);
             }
           }
-      }
+        }
 
-      if(m_bVolumeMute) {
-        nIcons |= eIconVolume;
-      } else {
-          if(eAudioTrackType == ttNone || (0 == nCnt % 10)) {
-            eAudioTrackType = cDevice::PrimaryDevice()->GetCurrentAudioTrack(); //Stereo/Dolby
-            nAudioChannel   = cDevice::PrimaryDevice()->GetAudioChannel();      //0-Stereo,1-Left, 2-Right
-          }
-          switch(eAudioTrackType) {
-            default:
-              break;
-            case ttAudioFirst ... ttAudioLast: {
-              switch(nAudioChannel) {
-                case 1:  nIcons |= eIconSpeakerL;  break;
-                case 2:  nIcons |= eIconSpeakerR;  break;
-                case 0:  
-                default: nIcons |= eIconSpeakerLR; break;
-                }
-            break;
+        switch(m_eWatchMode) {
+          default:
+          case eLiveTV:         nIcons |= eIconTV;break;
+          case eReplayNormal:   nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopMovie; break;
+          case eReplayMusic:    nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopMusic; break;
+          case eReplayDVD:      nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopDVD;   break;
+          case eReplayFile:     nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopWeb;   break;
+          case eReplayImage:    nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopPhoto; break;
+          case eReplayAudioCD:  nIcons |= eIconDiscSpin | eIconDiscEllispe | eIconTopDVD;   break;
+        }
+
+        bFlush = RenderScreen(bReDraw);
+        if(m_eWatchMode == eLiveTV) {
+            if((chFollowingTime - chPresentTime) > 0) {
+              nBottomProgressBar = (time(NULL) - chPresentTime) * 32 / (chFollowingTime - chPresentTime);
+              if(nBottomProgressBar > 32) nBottomProgressBar = 32;
+              if(nBottomProgressBar < 0)  nBottomProgressBar = 0;
+            } else {
+              nBottomProgressBar = 0;
             }
-            case ttDolbyFirst ... ttDolbyLast: 
-              nIcons |= eIconSpeaker51;
-            break;
+        } else {
+          if(total) {
+              nBottomProgressBar = current * 32 / total;
+              if(nBottomProgressBar > 32) nBottomProgressBar = 32;
+              if(nBottomProgressBar < 0)  nBottomProgressBar = 0;
+          } else {
+              nBottomProgressBar = 0;
           }
+          switch(ReplayMode()) {
+              case eReplayNone:
+              case eReplayPaused:
+                bUpdateIcons = false;
+                break;
+              default:
+              case eReplayPlay:
+                bUpdateIcons = (0 == (nCnt % 4));
+                nIcons |= eIconDiscRunSpin;
+                break;
+              case eReplayBackward1:
+                nIcons |= eIconDiscSpinBackward;
+              case eReplayForward1:
+                break;
+                bUpdateIcons = (0 == (nCnt % 3));
+                nIcons |= eIconDiscRunSpin;
+              case eReplayBackward2:
+                nIcons |= eIconDiscSpinBackward;
+              case eReplayForward2:
+                bUpdateIcons = (0 == (nCnt % 2));
+                nIcons |= eIconDiscRunSpin;
+                break;
+              case eReplayBackward3:
+                nIcons |= eIconDiscSpinBackward;
+              case eReplayForward3:
+                bUpdateIcons = true;
+                nIcons |= eIconDiscRunSpin;
+                break;
+          }
+          switch(m_eReplayMode) {
+            case eReplayModeShuffle:       nIcons |= eIconShuffle;  break;
+            case eReplayModeRepeat:        nIcons |= eIconRepeat;  break;
+            case eReplayModeRepeatShuffle: nIcons |= eIconShuffle | eIconRepeat;  break;
+            default: break;
+          }
+        }
+
+        switch(m_eVideoMode) {
+          case eVideoMPG:   nIcons |= eIconBL_MPG;  break;
+          case eVideoDivX:  nIcons |= eIconBL_DIVX;  break;
+          case eVideoXviD:  nIcons |= eIconBL_XVID;  break;
+          case eVideoWMV:   nIcons |= eIconBL_WMV;  break;
+          default:
+          case eVideoNone:  break;
+        }
+
+        if(m_eAudioMode & eAudioMPG) nIcons |= eIconBM_MPG;
+        if(m_eAudioMode & eAudioAC3) nIcons |= eIconBM_AC3;
+        if(m_eAudioMode & eAudioDTS) nIcons |= eIconBM_DTS;
+        if(m_eAudioMode & eAudioWMA) nIcons |= eIconBR_WMA;
+        if(m_eAudioMode & eAudioMP3) nIcons |= eIconBR_MP3;
+        if(m_eAudioMode & eAudioOGG) nIcons |= eIconBR_OGG;
+        if(m_eAudioMode & eAudioWAV) nIcons |= eIconBR_WAV;
+
+        for(n=0;n<memberof(m_nCardIsRecording);++n) {
+            if(0 != m_nCardIsRecording[n]) {
+              nIcons |= eIconRecording;
+              switch(n) {
+                case 0: nIcons |= eIconSRC;  break;
+                case 1: nIcons |= eIconSRC1; break;
+                case 2: nIcons |= eIconSRC2; break;
+              }
+            }
+        }
+
+        if(m_bVolumeMute) {
+          nIcons |= eIconVolume;
+        } else {
+            if(eAudioTrackType == ttNone || (0 == nCnt % 10)) {
+              eAudioTrackType = cDevice::PrimaryDevice()->GetCurrentAudioTrack(); //Stereo/Dolby
+              nAudioChannel   = cDevice::PrimaryDevice()->GetAudioChannel();      //0-Stereo,1-Left, 2-Right
+            }
+            switch(eAudioTrackType) {
+              default:
+                break;
+              case ttAudioFirst ... ttAudioLast: {
+                switch(nAudioChannel) {
+                  case 1:  nIcons |= eIconSpeakerL;  break;
+                  case 2:  nIcons |= eIconSpeakerR;  break;
+                  case 0:  
+                  default: nIcons |= eIconSpeakerLR; break;
+                  }
+              break;
+              }
+              case ttDolbyFirst ... ttDolbyLast: 
+                nIcons |= eIconSpeaker51;
+              break;
+            }
+        }
+      }
+
+      if(theSetup.m_nContrast != nContrast) {
+        nContrast = theSetup.m_nContrast;
+        Contrast(nContrast);
+      }
+
+      //Force icon state (defined by svdrp)
+      nIcons &= ~(m_nIconsForceMask);
+      nIcons |=  (m_nIconsForceOn);
+      nIcons &= ~(m_nIconsForceOff);
+      if(m_nIconsForceOn & eIconDiscRunSpin) {
+        bUpdateIcons |= (0 == (nCnt % 4));
+        nIcons &= ~(eIconDiscSpinBackward);
+      }
+
+      if(bUpdateIcons || nIcons != nLastIcons) {
+        icons(nIcons);
+        nLastIcons = nIcons;
+      }
+      if(nTopProgressBar != nLastTopProgressBar
+         || nBottomProgressBar != nLastBottomProgressBar ) {
+
+         setLineLength(nTopProgressBar, nBottomProgressBar, nTopProgressBar, nBottomProgressBar);
+         nLastTopProgressBar = nTopProgressBar;
+         nLastBottomProgressBar = nBottomProgressBar;
+
       }
     }
 
-    runTime.Set();
-    if(theSetup.m_nContrast != nContrast) {
-      nContrast = theSetup.m_nContrast;
-      Contrast(nContrast);
-    }
-
-    //Force icon state (defined by svdrp)
-    nIcons &= ~(m_nIconsForceMask);
-    nIcons |=  (m_nIconsForceOn);
-    nIcons &= ~(m_nIconsForceOff);
-    if(m_nIconsForceOn & eIconDiscRunSpin) {
-      bUpdateIcons |= (0 == (nCnt % 4));
-      nIcons &= ~(eIconDiscSpinBackward);
-    }
-
-    if(bUpdateIcons || nIcons != nLastIcons) {
-      icons(nIcons);
-      nLastIcons = nIcons;
-    }
-    if(nTopProgressBar != nLastTopProgressBar
-       || nBottomProgressBar != nLastBottomProgressBar ) {
-
-       setLineLength(nTopProgressBar, nBottomProgressBar, nTopProgressBar, nBottomProgressBar);
-       nLastTopProgressBar = nTopProgressBar;
-       nLastBottomProgressBar = nBottomProgressBar;
-
-    }
     if(bFlush) {
       flush();
     }
-    int nDelay = 100 - runTime.Elapsed();
+    int nDelay = (bSuspend ? 1000 : 100) - runTime.Elapsed();
     if(nDelay <= 10) {
       nDelay = 10;
     }

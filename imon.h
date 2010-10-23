@@ -113,6 +113,7 @@ protected:
 
   bool SendCmd(const uint64_t & cmdData);
   bool SendCmdClock(time_t tAlarm);
+  bool SendCmdInit();
   bool SendCmdShutdown();
   bool Contrast(int nContrast);
 public:
