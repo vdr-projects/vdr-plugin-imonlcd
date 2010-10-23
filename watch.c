@@ -78,7 +78,6 @@ ciMonWatch::ciMonWatch()
 
 ciMonWatch::~ciMonWatch()
 {
-  close();
   if(chName) { 
       delete chName;
       chName = NULL;
@@ -131,7 +130,7 @@ int ciMonWatch::open(const char* szDevice, eProtocol pro) {
     return iRet;
 }
 
-void ciMonWatch::close() {
+void ciMonWatch::shutdown(int nExitMode) {
 
   if(Running()) {
     m_bShutdown = true;
@@ -142,7 +141,7 @@ void ciMonWatch::close() {
   if(this->isopen()) {
     cTimer* t = Timers.GetNextActiveTimer();    
 
-    switch(theSetup.m_nOnExit) {
+    switch(nExitMode) {
       case eOnExitMode_NEXTTIMER: {
         isyslog("iMonLCD: closing, show only next timer.");
         this->setLineLength(0,0,0,0);

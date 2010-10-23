@@ -1,7 +1,7 @@
 /*
  * iMON LCD plugin for VDR (C++)
  *
- * (C) 2009 Andreas Brachold <vdr07 AT deltab de>
+ * (C) 2009-2010 Andreas Brachold <vdr07 AT deltab de>
  *
  * This iMON LCD plugin is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as published 
@@ -116,12 +116,13 @@ protected:
   bool SendCmdInit();
   bool SendCmdShutdown();
   bool Contrast(int nContrast);
+
+  void close();
 public:
   ciMonLCD();
   virtual ~ciMonLCD();
 
   virtual int open(const char* szDevice, eProtocol pro);
-  virtual void close ();
 
   bool isopen() const { return imon_fd >= 0; }
   void clear ();

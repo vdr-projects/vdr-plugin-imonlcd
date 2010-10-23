@@ -137,7 +137,7 @@ public:
   virtual ~ciMonWatch();
 
   virtual int open(const char* szDevice, eProtocol pro);
-  virtual void close ();
+  virtual void shutdown(int nExitMode);
 
   void Replaying(const cControl *pControl, const char *szName, const char *szFileName, bool bOn);
   void Recording(const cDevice *pDevice, const char *szName, const char *szFileName, bool bOn);

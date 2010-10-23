@@ -169,7 +169,7 @@ bool cPluginImonlcd::resume() {
 
 bool cPluginImonlcd::suspend() {
   if(!m_bSuspend) {
-    m_dev.close();
+    m_dev.shutdown(eOnExitMode_BLANKSCREEN);
     m_bSuspend = true;
     return true;
   }
@@ -195,7 +195,7 @@ void cPluginImonlcd::Stop(void)
     statusMonitor = NULL;
   }
 
-  m_dev.close();
+  m_dev.shutdown(theSetup.m_nOnExit);
   
   if(m_szDevice) {
     free(m_szDevice);
