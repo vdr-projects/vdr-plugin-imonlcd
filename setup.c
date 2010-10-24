@@ -257,7 +257,7 @@ void ciMonMenuSetup::Store(void)
   SetupStore("SmallFont",  theSetup.m_nSmallFontHeight);
   SetupStore("Wakeup",     theSetup.m_nWakeup);
   SetupStore("TwoLineMode",theSetup.m_nRenderMode);
-  SetupStore("SuspendMode", theSetup.m_nSuspendTimeOn);
+  SetupStore("SuspendMode", theSetup.m_nSuspendMode);
   SetupStore("SuspendTimeOn", theSetup.m_nSuspendTimeOn);
   SetupStore("SuspendTimeOff", theSetup.m_nSuspendTimeOff);
 }
