@@ -1,7 +1,7 @@
 # vdr-imonlcd-plugin language source file.
 # Copyright (C) Diego Pierotto <vdr-italian at tiscali.it>
 # This file is distributed under the same license as the PACKAGE package.
-# Diego Pierotto <vdr-italian at tiscali.it> 2009
+# Diego Pierotto <vdr-italian at tiscali.it> 2009-2010
 #
 msgid ""
 msgstr ""
@@ -52,7 +52,7 @@ msgid "Dual lines"
 msgstr "Linee doppie"
 
 msgid "Only topic"
-msgstr "Titolo solo"
+msgstr "Solo titolo"
 
 msgid "Render mode"
 msgstr "Modalità visione"
@@ -79,23 +79,22 @@ msgid "Margin time at wake up (min)"
 msgstr "Margine di tempo al risveglio (min)"
 
 msgid "Never"
-msgstr ""
+msgstr "Mai"
 
 msgid "Resume on activities"
-msgstr ""
+msgstr "Riprendi attività"
 
-#, fuzzy
 msgid "Only per time"
-msgstr "Titolo solo"
+msgstr "Solo per l'ora"
 
 msgid "Suspend display at night"
-msgstr ""
+msgstr "Sospendi schermo la notte"
 
 msgid "Beginning of suspend"
-msgstr ""
+msgstr "Inizio sospensione"
 
 msgid "End time of suspend"
-msgstr ""
+msgstr "Fine sospensione"
 
 msgid "None active timer"
 msgstr "Nessun timer attivo"
