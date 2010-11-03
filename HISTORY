@@ -1,11 +1,13 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
-2010-
+2010-11-03 Version 0.0.5
+- blank the device by svdrp command 'off'
 - Allow turn display off at night (Feature #175)
+- Fix a segmentation fault on replay (Bug #432)
 - Add render mode "show channel names only" (Feature #426)
-- Show next timer on lines (Feature #427)
-- update italian translation provided by Diego Pierotto (Feature #406)
+- Show next timer on two lines (Feature #427)
+- update italian translation provided by Diego Pierotto (Feature #406, #445)
 
 2010-04-22: Version 0.0.4
 - Allow setup font size
