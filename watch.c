@@ -284,10 +284,7 @@ void ciMonWatch::Action(void)
           if(m_eWatchMode != eLiveTV) {
             current = 0;
             total = 0;
-      	    if (ReplayPosition(current,total)
-                 && theSetup.m_nRenderMode == eRenderMode_DualLine) {
-              bReDraw |= ReplayTime(current,total);
-            }
+            bReDraw |= ReplayTime(current,total);
           }
         }
 
@@ -741,29 +738,26 @@ eReplayState ciMonWatch::ReplayMode() const
   return eReplayNone;
 }
 
-bool ciMonWatch::ReplayPosition(int &current, int &total) const
+bool ciMonWatch::ReplayPosition(int &current, int &total, double& dFrameRate) const
 {
   if (m_pControl && ((cControl *)m_pControl)->GetIndex(current, total, false)) {
     total = (total == 0) ? 1 : total;
+#if VDRVERSNUM >= 10703
+    dFrameRate = ((cControl *)m_pControl)->FramesPerSecond();
+#endif
     return true;
   }
   return false;
 }
 
-const char * ciMonWatch::FormatReplayTime(int current, int total) const
+const char * ciMonWatch::FormatReplayTime(int current, int total, double dFrameRate) const
 {
     static char s[32];
-#if VDRVERSNUM >= 10701
-    int cs = (current / DEFAULTFRAMESPERSECOND);
-    int ts = (total / DEFAULTFRAMESPERSECOND);
-    bool g = (((current / DEFAULTFRAMESPERSECOND) / 3600) > 0)
-            || (((total / DEFAULTFRAMESPERSECOND) / 3600) > 0);
-#else
-    int cs = (current / FRAMESPERSEC);
-    int ts = (total / FRAMESPERSEC);
-    bool g = (((current / FRAMESPERSEC) / 3600) > 0)
-            || (((total / FRAMESPERSEC) / 3600) > 0);
-#endif
+
+    int cs = (int)((double)current / dFrameRate);
+    int ts = (int)((double)total / dFrameRate);
+    bool g = ((cs / 3600) > 0) || ((ts / 3600) > 0);
+
     int cm = cs / 60;
     cs %= 60;
     int tm = ts / 60;
@@ -786,13 +780,22 @@ const char * ciMonWatch::FormatReplayTime(int current, int total) const
     return s;
 }
 
-bool ciMonWatch::ReplayTime(int current, int total) {
-    const char * sz = FormatReplayTime(current,total);
-    if(!replayTime || strcmp(sz,*replayTime)) {
-      if(replayTime)
-        delete replayTime;
-      replayTime = new cString(sz);
-      return replayTime != NULL;      
+bool ciMonWatch::ReplayTime(int &current, int &total) {
+    double dFrameRate;
+#if VDRVERSNUM >= 10701
+    dFrameRate = DEFAULTFRAMESPERSECOND;
+#else
+    dFrameRate = FRAMESPERSEC;
+#endif
+    if(ReplayPosition(current,total,dFrameRate) 
+      && theSetup.m_nRenderMode == eRenderMode_DualLine) {
+      const char * sz = FormatReplayTime(current,total,dFrameRate);
+      if(!replayTime || strcmp(sz,*replayTime)) {
+        if(replayTime)
+          delete replayTime;
+        replayTime = new cString(sz);
+        return replayTime != NULL;      
+      }
     }
     return false;
 }

@@ -128,10 +128,10 @@ protected:
   bool Replay();
   bool RenderScreen(bool bRedraw);
   eReplayState ReplayMode() const;
-  bool ReplayPosition(int &current, int &total) const;
+  bool ReplayPosition(int &current, int &total, double& dFrameRate) const;
   bool CurrentTime();
-  bool ReplayTime(int current, int total);
-  const char * FormatReplayTime(int current, int total) const;
+  bool ReplayTime(int& current, int& total);
+  const char * FormatReplayTime(int current, int total, double dFrameRate) const;
 public:
   ciMonWatch();
   virtual ~ciMonWatch();
