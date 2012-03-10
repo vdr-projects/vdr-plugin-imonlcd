@@ -27,11 +27,15 @@ ciMonStatusMonitor::ciMonStatusMonitor(ciMonWatch*    pDev)
 
 }
 
-void ciMonStatusMonitor::ChannelSwitch(const cDevice *pDevice, int nChannelNumber)
-{
+#if VDRVERSNUM >= 10726
+void ciMonStatusMonitor::ChannelSwitch(const cDevice *pDevice, int nChannelNumber, bool bLiveView) {
+#else
+void ciMonStatusMonitor::ChannelSwitch(const cDevice *pDevice, int nChannelNumber) {
+    bool bLiveView = pDevice && pDevice->IsPrimaryDevice()  && false == EITScanner.UsesDevice(pDevice);
+#endif
+
     if (nChannelNumber > 0 
-        && pDevice->IsPrimaryDevice() 
-        && !EITScanner.UsesDevice(pDevice)
+        && bLiveView
         && (nChannelNumber == cDevice::CurrentChannel()))
     {
 #ifdef MOREDEBUGMSG
