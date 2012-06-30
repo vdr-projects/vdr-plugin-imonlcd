@@ -1,6 +1,12 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
+2012-06-30 Version 1.0.0
+- Update plugin interface for vdr 1.7.26
+- Wrong time on playback of HD recordings (Bug #517)
+- Ignore empty subtitle on replay (Feature #484)
+- Avoid hidden ‘ciMonFont::DrawText’ [-Werror=overloaded-virtual] (Bug #1034)
+
 2010-11-03 Version 0.0.5
 - blank the device by svdrp command 'off'
 - Allow turn display off at night (Feature #175)

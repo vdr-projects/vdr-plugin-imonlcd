@@ -1,7 +1,7 @@
 #
 # Makefile for iMON LCD plugin to VDR (C++)
 #
-# (C) 2009 Andreas Brachold <vdr07 AT deltab de>
+# (C) 2009-2012 Andreas Brachold <vdr07 AT deltab de>
 #
 # This iMON LCD plugin is free software: you can redistribute it and/or 
 # modify it under the terms of the GNU General Public License as published 

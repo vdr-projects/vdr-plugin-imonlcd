@@ -1,7 +1,7 @@
 /*
  * iMON LCD plugin for VDR (C++)
  *
- * (C) 2009 Andreas Brachold <vdr07 AT deltab de>
+ * (C) 2009-2012 Andreas Brachold <vdr07 AT deltab de>
  * Based on lcdproc Driver for SoundGraph iMON OEM LCD Modules
  * Copyright (c) 2004, Venky Raju <dev (at) venky (dot) ws>
  *               2007, Dean Harding <dean (at) codeka dotcom>

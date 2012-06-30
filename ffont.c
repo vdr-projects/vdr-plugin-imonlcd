@@ -1,7 +1,7 @@
 /*
  * iMON LCD plugin for VDR (C++)
  *
- * (C) 2009 Andreas Brachold <vdr07 AT deltab de>
+ * (C) 2009-2012 Andreas Brachold <vdr07 AT deltab de>
  *     Glyph handling based on <vdr/font.c>
  *
  * This iMON LCD plugin is free software: you can redistribute it and/or 
