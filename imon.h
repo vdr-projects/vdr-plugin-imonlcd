@@ -109,7 +109,7 @@ protected:
 
   void setLineLength(int topLine, int botLine, int topProgress, int botProgress);
   void setBuiltinProgressBars(int topLine, int botLine, int topProgress, int botProgress);
-  int lengthToPixels(int length);
+  unsigned int lengthToPixels(int length);
 
   bool SendCmd(const uint64_t & cmdData);
   bool SendCmdClock(time_t tAlarm);

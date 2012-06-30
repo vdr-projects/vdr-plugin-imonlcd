@@ -66,6 +66,7 @@ private:
   int Kerning(ciMonGlyph *Glyph, uint PrevSym) const;
   ciMonGlyph* Glyph(uint CharCode) const;
   virtual void DrawText(cBitmap*, int, int, const char*, tColor, tColor, int) const {};
+  virtual void DrawText(cPixmap*, int, int, const char*, tColor, tColor, int) const {};
 public:
   ciMonFont(const char *Name, int CharHeight, int CharWidth = 0);
   virtual ~ciMonFont();

@@ -626,9 +626,9 @@ void ciMonLCD::setBuiltinProgressBars(int topLine, int botLine,
  * \param length The length of the bar.
  * \return The pixmap that represents the given length.
  */
-int ciMonLCD::lengthToPixels(int length)
+unsigned int ciMonLCD::lengthToPixels(int length)
 {
-	int pixLen[] =
+	unsigned int pixLen[] =
 	{
 		0x00, 0x00000080, 0x000000c0, 0x000000e0, 0x000000f0,
 		0x000000f8, 0x000000fc, 0x000000fe, 0x000000ff,
