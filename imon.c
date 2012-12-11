@@ -116,8 +116,10 @@ static const uint64_t ICON_SPKR_FL	  = ((uint64_t) 1 << 0);
 ciMonLCD::ciMonLCD() 
 {
 	this->imon_fd = -1;
-  this->pFont = NULL;
+	this->framebuf = NULL;
+	this->backingstore = NULL;
 	this->last_cd_state = 0;
+	this->pFont = NULL;
 }
 
 ciMonLCD::~ciMonLCD() {
