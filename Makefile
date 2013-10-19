@@ -111,7 +111,7 @@ install-i18n: $(I18Nmsgs)
 ### Targets:
 
 $(SOFILE): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LIBS) -shared $(OBJS) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
 
 install-lib: $(SOFILE)
 	install -D $^ $(LIBDIR)/$^.$(APIVERSION)
