@@ -756,7 +756,7 @@ const char * ciMonWatch::FormatReplayTime(int current, int total, double dFrameR
 
     int cs = (int)((double)current / dFrameRate);
     int ts = (int)((double)total / dFrameRate);
-    bool g = ((cs / 3600) > 0) || ((ts / 3600) > 0);
+    bool g = (cs > 3600) || (ts > 3600);
 
     int cm = cs / 60;
     cs %= 60;
