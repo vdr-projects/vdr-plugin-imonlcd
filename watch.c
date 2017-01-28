@@ -140,8 +140,16 @@ void ciMonWatch::shutdown(int nExitMode) {
   }
 
   if(this->isopen()) {
-    cTimer* t = Timers.GetNextActiveTimer();    
-
+    const cTimer* t = NULL;
+#if APIVERSNUM >= 20302
+    cStateKey lock;
+    if (const cTimers *Timers = cTimers::GetTimersRead(lock)) {
+       t = Timers->GetNextActiveTimer();
+       lock.Remove();
+    }
+#else
+    t = Timers.GetNextActiveTimer();
+#endif
     switch(nExitMode) {
       case eOnExitMode_NEXTTIMER: {
         isyslog("iMonLCD: closing, show only next timer.");
@@ -849,7 +857,17 @@ void ciMonWatch::Channel(int ChannelNumber)
     m_eVideoMode = eVideoNone;
     m_eAudioMode = eAudioNone;
 
-    cChannel * ch = Channels.GetByNumber(ChannelNumber);
+    const cChannel * ch = NULL;
+#if APIVERSNUM >= 20302
+		cStateKey lock;
+		if (const cChannels *Channels = cChannels::GetChannelsRead(lock)) {
+		   ch = Channels->GetByNumber(ChannelNumber);
+		   lock.Remove();
+		}
+#else
+    ch = Channels.GetByNumber(ChannelNumber);
+#endif
+
     if(ch) {
       chID = ch->GetChannelID();
       chPresentTime = 0;
@@ -868,48 +886,51 @@ void ciMonWatch::Channel(int ChannelNumber)
 }
 
 bool ciMonWatch::Program() {
-
     bool bChanged = false;
     const cEvent * p = NULL;
-    cSchedulesLock schedulesLock;
-    const cSchedules * schedules = cSchedules::Schedules(schedulesLock);
-    if (chID.Valid() && schedules)
-    {
-        const cSchedule * schedule = schedules->GetSchedule(chID);
-        if (schedule)
-        {
-            if ((p = schedule->GetPresentEvent()) != NULL)
-            {
-                if(chPresentTime && chEventID == p->EventID()) {
-                  return false;
-                }
+#if APIVERSNUM >= 20302
+    cStateKey lock;
+    const cSchedules * schedules = cSchedules::GetSchedulesRead(lock);
+#else
+    cSchedulesLock lock;
+    const cSchedules * schedules = cSchedules::Schedules(lock);
+#endif
+    if (chID.Valid() && schedules) {
+      const cSchedule * schedule = schedules->GetSchedule(chID);
+      if (schedule) {
 
-                bChanged  = true;
-                chEventID = p->EventID();
-                chPresentTime = p->StartTime();
-                chFollowingTime = p->EndTime();
+        if ((p = schedule->GetPresentEvent()) != NULL) {
 
-                if(chPresentTitle) { 
-                    delete chPresentTitle;
-                    chPresentTitle = NULL;
-                }
-                if (!isempty(p->Title())) {
-                    chPresentTitle = new cString(p->Title());
-                }
+            if(chPresentTime && chEventID != p->EventID()) {
+            bChanged  = true;
+            chEventID = p->EventID();
+            chPresentTime = p->StartTime();
+            chFollowingTime = p->EndTime();
 
-                if(chPresentShortTitle) { 
-                    delete chPresentShortTitle;
-                    chPresentShortTitle = NULL;
-                }
-                if (!isempty(p->ShortText())) {
-                    chPresentShortTitle = new cString(p->ShortText());
-                }
+            if(chPresentTitle) {
+              delete chPresentTitle;
+              chPresentTitle = NULL;
             }
+            if (!isempty(p->Title())) {
+              chPresentTitle = new cString(p->Title());
+            }
+
+            if(chPresentShortTitle) {
+              delete chPresentShortTitle;
+              chPresentShortTitle = NULL;
+            }
+            if (!isempty(p->ShortText())) {
+              chPresentShortTitle = new cString(p->ShortText());
+            }
+          }
         }
+      }
+#if APIVERSNUM >= 20302
+      lock.Remove();
+#endif
     }
     return bChanged;
 }
-
 
 void ciMonWatch::Volume(int nVolume, bool bAbsolute)
 {

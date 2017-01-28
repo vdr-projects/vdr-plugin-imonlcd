@@ -59,6 +59,7 @@ class ciMonFont : public cFont {
 private:
   int height;
   int bottom;
+  int width;
   FT_Library library; ///< Handle to library
   FT_Face face; ///< Handle to face object
   mutable cList<ciMonGlyph> glyphCacheMonochrome;
@@ -70,6 +71,7 @@ private:
 public:
   ciMonFont(const char *Name, int CharHeight, int CharWidth = 0);
   virtual ~ciMonFont();
+  virtual int Width(void) const { return width; }
   virtual int Width(uint c) const;
   virtual int Width(const char *s) const;
   virtual int Height(void) const { return height; }
