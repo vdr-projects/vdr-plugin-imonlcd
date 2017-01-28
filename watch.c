@@ -201,13 +201,13 @@ void ciMonWatch::shutdown(int nExitMode) {
       } 
       case eOnExitMode_WAKEUP: {
         isyslog("iMonLCD: closing, set wakeup time and showing clock.");
-        SendCmdClock(t ? t->StartTime() - (theSetup.m_nWakeup * 60) : NULL);
+        SendCmdClock(t ? t->StartTime() - (theSetup.m_nWakeup * 60) : 0);
         break;
       } 
       default:
       case eOnExitMode_SHOWCLOCK: {
         isyslog("iMonLCD: closing, showing clock.");
-        SendCmdClock(NULL);
+        SendCmdClock(0);
         break;
       } 
     }
@@ -834,7 +834,7 @@ void ciMonWatch::Recording(const cDevice *pDevice, const char *szName, const cha
     }
   }
   else {
-    esyslog("iMonLCD: Recording: only up to %d devices are supported by this plugin", memberof(m_nCardIsRecording));
+    esyslog("iMonLCD: Recording: only up to %u devices are supported by this plugin", (unsigned int) memberof(m_nCardIsRecording));
   }
 }
 

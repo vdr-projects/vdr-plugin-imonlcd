@@ -330,11 +330,12 @@ bool ciMonLCD::flush()
       else
         nCopy = 0;
     }
-    if(nCopy!=packetSize)
-  		memset(tx_buf, 0xFF , packetSize);
-    if(nCopy)
-  		memcpy(tx_buf, fb + offset, nCopy);
-
+    if(nCopy!=packetSize) {
+      memset(tx_buf, 0xFF , packetSize);
+    }
+    if(nCopy) {
+      memcpy(tx_buf, fb + offset, nCopy);
+    }
 		/* Add the memory register byte to the packet data. */
 		tx_buf[packetSize] = msb;
 
@@ -520,7 +521,6 @@ bool ciMonLCD::SendCmd(const uint64_t & cmdData) {
 	unsigned char buf[8];
   
   if(!this->isopen()) {
-    dsyslog("iMonLCD: can't write : %08llx", cmdData);
     esyslog("iMonLCD: error writing to dead file descriptor");
     return false;
   }
