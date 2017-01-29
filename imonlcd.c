@@ -20,7 +20,7 @@
 #include "status.h"
 #include "setup.h"
 
-static const char *VERSION        = "1.0.1";
+static const char *VERSION        = "1.0.2";
 
 static const char *DEFAULT_LCDDEVICE  = "/dev/lcd0";
 
