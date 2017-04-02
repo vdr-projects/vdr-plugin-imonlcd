@@ -1,6 +1,9 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
+- Update plugin interface for vdr 2.3.3
+- Drop legacy code prior vdr 1.7.3
+
 2017-01-29: Version 1.0.2
 - Update plugin interface for vdr 2.3.2
 - Fix display wrong time for HD recording if they greater than one hour (Bug #1568)
