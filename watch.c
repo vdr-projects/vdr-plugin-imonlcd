@@ -286,7 +286,7 @@ void ciMonWatch::Action(void)
       if(!bSuspend) {
         // every second the clock need updates.
         if((0 == (nCnt % 5))) {
-     	    if (theSetup.m_nRenderMode == eRenderMode_DualLine) {
+           if (theSetup.m_nRenderMode == eRenderMode_DualLine) {
             bReDraw |= CurrentTime();
           }
           if(m_eWatchMode != eLiveTV) {
@@ -723,7 +723,7 @@ eReplayState ciMonWatch::ReplayMode() const
 {
   bool Play = false, Forward = false;
   int Speed = -1;
-	if (m_pControl
+  if (m_pControl
         && ((cControl *)m_pControl)->GetReplayMode(Play,Forward,Speed))
   {
     // 'Play' tells whether we are playing or pausing, 'Forward' tells whether
@@ -859,11 +859,11 @@ void ciMonWatch::Channel(int ChannelNumber)
 
     const cChannel * ch = NULL;
 #if APIVERSNUM >= 20302
-		cStateKey lock;
-		if (const cChannels *Channels = cChannels::GetChannelsRead(lock)) {
-		   ch = Channels->GetByNumber(ChannelNumber);
-		   lock.Remove();
-		}
+    cStateKey lock;
+    if (const cChannels *Channels = cChannels::GetChannelsRead(lock)) {
+       ch = Channels->GetByNumber(ChannelNumber);
+       lock.Remove();
+    }
 #else
     ch = Channels.GetByNumber(ChannelNumber);
 #endif
@@ -895,29 +895,31 @@ bool ciMonWatch::Program() {
     cSchedulesLock lock;
     const cSchedules * schedules = cSchedules::Schedules(lock);
 #endif
-    if (chID.Valid() && schedules) {
-      const cSchedule * schedule = schedules->GetSchedule(chID);
-      if (schedule && (p = schedule->GetPresentEvent()) != NULL) {
-        if(!chPresentTime || chEventID != p->EventID()) {
-          bChanged  = true;
-          chEventID = p->EventID();
-          chPresentTime = p->StartTime();
-          chFollowingTime = p->EndTime();
+    if (schedules) {
+      if (chID.Valid()) {
+        const cSchedule * schedule = schedules->GetSchedule(chID);
+        if (schedule && (p = schedule->GetPresentEvent()) != NULL) {
+          if(!chPresentTime || chEventID != p->EventID()) {
+            bChanged  = true;
+            chEventID = p->EventID();
+            chPresentTime = p->StartTime();
+            chFollowingTime = p->EndTime();
 
-          if(chPresentTitle) {
-            delete chPresentTitle;
-            chPresentTitle = NULL;
-          }
-          if (!isempty(p->Title())) {
-            chPresentTitle = new cString(p->Title());
-          }
+            if(chPresentTitle) {
+              delete chPresentTitle;
+              chPresentTitle = NULL;
+            }
+            if (!isempty(p->Title())) {
+              chPresentTitle = new cString(p->Title());
+            }
 
-          if(chPresentShortTitle) {
-            delete chPresentShortTitle;
-            chPresentShortTitle = NULL;
-          }
-          if (!isempty(p->ShortText())) {
-            chPresentShortTitle = new cString(p->ShortText());
+            if(chPresentShortTitle) {
+              delete chPresentShortTitle;
+              chPresentShortTitle = NULL;
+            }
+            if (!isempty(p->ShortText())) {
+              chPresentShortTitle = new cString(p->ShortText());
+            }
           }
         }
       }
