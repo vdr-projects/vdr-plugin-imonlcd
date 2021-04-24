@@ -55,8 +55,8 @@ SOFILE = libvdr-$(PLUGIN).so
 
 ### Includes and Defines (add further entries here):
 
-INCLUDES += $(shell freetype-config --cflags)
-LIBS += $(shell freetype-config --libs)
+INCLUDES += $(shell pkg-config freetype2 --cflags)
+LIBS += $(shell pkg-config freetype2 --libs)
 
 DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
 
