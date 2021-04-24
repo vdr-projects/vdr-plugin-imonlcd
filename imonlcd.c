@@ -3,8 +3,8 @@
  *
  * (C) 2009-2012 Andreas Brachold <vdr07 AT deltab de>
  *
- * This iMON LCD plugin is free software: you can redistribute it and/or 
- * modify it under the terms of the GNU General Public License as published 
+ * This iMON LCD plugin is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published
  * by the Free Software Foundation, version 3 of the License.
  *
  * See the files README and COPYING for details.
@@ -20,7 +20,7 @@
 #include "status.h"
 #include "setup.h"
 
-static const char *VERSION        = "1.0.2";
+static const char *VERSION        = "1.0.3";
 
 static const char *DEFAULT_LCDDEVICE  = "/dev/lcd0";
 

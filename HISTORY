@@ -1,6 +1,8 @@
 VDR Plugin 'imonlcd' Revision History
 -------------------------------------
 
+2021-04-24: Version 1.0.3
+- Fix freetype includes for freetype 2.9.1 and above
 - Update plugin interface for vdr 2.3.3
 - Drop legacy code prior vdr 1.7.3
 
